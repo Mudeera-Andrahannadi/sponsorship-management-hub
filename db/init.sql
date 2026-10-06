@@ -3,22 +3,22 @@ USE Sponsorship_Hub;
 
 CREATE TABLE users (
     User_ID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255),
-    University_Reg_No VARCHAR(50),
-    Email VARCHAR(255) UNIQUE,
-    Password VARCHAR(255),
-    Role VARCHAR(50)
+    Name VARCHAR(255) NOT NULL,
+    University_Reg_No VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    Role VARCHAR(50) NOT NULL CHECK (Role COLLATE utf8mb4_bin IN ('Student', 'Admin'))
 );
 
 CREATE TABLE companies (
     Company_ID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255),
+    Name VARCHAR(255) NOT NULL,
     Contact_Person VARCHAR(255),
     Position VARCHAR(100),
     Field VARCHAR(100),
     Email VARCHAR(255),
     Contact_Number VARCHAR(20),
-    Tracking_Status ENUM('Available', 'In Progress', 'Locked') DEFAULT 'Available',
+    Tracking_Status ENUM('Available', 'In Progress', 'Locked') NOT NULL DEFAULT 'Available',
     Locked_Until DATETIME,
     Locked_By INT,
     Lock_Days INT,
@@ -29,7 +29,7 @@ CREATE TABLE companies (
 
 CREATE TABLE events (
     Event_ID INT AUTO_INCREMENT PRIMARY KEY,
-    Name VARCHAR(255),
+    Name VARCHAR(255) NOT NULL,
     Organized_Society VARCHAR(255),
     Event_Month VARCHAR(50),
     Event_Date DATE
@@ -37,23 +37,24 @@ CREATE TABLE events (
 
 CREATE TABLE event_committee (
     Committee_ID INT AUTO_INCREMENT PRIMARY KEY,
-    User_ID INT,
-    Event_ID INT,
+    User_ID INT NOT NULL,
+    Event_ID INT NOT NULL,
     Position VARCHAR(100),
     Assigned_Date DATE,
-    Is_Active BOOLEAN DEFAULT TRUE,
+    Is_Active BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE (User_ID, Event_ID),
     FOREIGN KEY (User_ID) REFERENCES users(User_ID),
     FOREIGN KEY (Event_ID) REFERENCES events(Event_ID)
 );
 
 CREATE TABLE sponsorship_history (
     Sponsorship_ID INT AUTO_INCREMENT PRIMARY KEY,
-    Company_ID INT,
-    Event_ID INT,
-    Handled_By INT,
-    Amount DECIMAL(10, 2),
-    Status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
-    Requested_Date DATE,
+    Company_ID INT NOT NULL,
+    Event_ID INT NOT NULL,
+    Handled_By INT NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL CHECK (Amount > 0),
+    Status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
+    Requested_Date DATE NOT NULL,
     Notes TEXT,
     FOREIGN KEY (Company_ID) REFERENCES companies(Company_ID),
     FOREIGN KEY (Event_ID) REFERENCES events(Event_ID),

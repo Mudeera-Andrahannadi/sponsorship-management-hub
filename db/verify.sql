@@ -2,7 +2,7 @@ USE Sponsorship_Hub;
 
 SELECT Name,
     CASE WHEN Tracking_Status <> 'Available' AND Locked_Until < NOW() THEN 'Available' ELSE Tracking_Status END AS Light,
-    GREATEST(DATEDIFF(Locked_Until, NOW()), 0) AS Days_Left
+    GREATEST(CEIL(TIMESTAMPDIFF(MINUTE, NOW(), Locked_Until) / 1440), 0) AS Days_Left
 FROM companies
 ORDER BY Light, Name;
 
