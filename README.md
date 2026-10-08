@@ -2,7 +2,7 @@
 
 Student societies keep emailing the same companies for sponsorships, and the companies get tired of it. This app lets a committee check if a company is free, hold it for a while, and log how the pitch went, so two societies don't chase the same company at once.
 
-Only the database is done so far.
+The database and the Spring Boot project setup are done so far.
 
 ## Database
 
@@ -17,6 +17,17 @@ That creates the tables and loads the sample data. `db/verify.sql` then lists ev
 Status colours: green is `Available`, yellow is `In Progress` (a society is talking to them), red is `Locked` (cooldown after a sponsorship).
 
 I added a few things the handover didn't have: a phone number, who holds the lock and per-company lock lengths on `companies`, a `Notes` column on `sponsorship_history`, and a unique email on `users`.
+
+## Backend
+
+Spring Boot 3.3.4 on Java 21, built with the Maven wrapper in `backend/`. It connects to `sponsorship_hub` and uses `ddl-auto=validate`, so it never touches the tables.
+
+```
+cd backend
+DB_PASS=your_mysql_password ./mvnw spring-boot:run
+```
+
+`DB_PASS` is required. `DB_USER` (default `root`), `DB_HOST` (default `localhost`) and `DB_PORT` (default `3306`) are optional.
 
 ## Sample logins
 
