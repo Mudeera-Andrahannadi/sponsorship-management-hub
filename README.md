@@ -29,6 +29,8 @@ DB_PASS=your_mysql_password ./mvnw spring-boot:run
 
 `DB_PASS` is required. `DB_USER` (default `root`), `DB_HOST` (default `localhost`) and `DB_PORT` (default `3306`) are optional.
 
+`./mvnw test` starts a throwaway MySQL container and loads `db/init.sql` into it, so Docker has to be running.
+
 ## Sample logins
 
 Every seeded user has the password `Hub@2026`.
