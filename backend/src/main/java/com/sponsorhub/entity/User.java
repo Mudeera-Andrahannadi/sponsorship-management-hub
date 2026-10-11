@@ -8,13 +8,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
 public class User
 {
     @Id
@@ -37,4 +33,64 @@ public class User
     @Enumerated(EnumType.STRING)
     @Column(name = "Role")
     private Role role;
+
+    public Integer getUser_id()
+    {
+        return user_id;
+    }
+
+    public void setUser_id(Integer user_id)
+    {
+        this.user_id = user_id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getReg_no()
+    {
+        return reg_no;
+    }
+
+    public void setReg_no(String reg_no)
+    {
+        this.reg_no = reg_no;
+    }
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
+    public Role getRole()
+    {
+        return role;
+    }
+
+    public void setRole(Role role)
+    {
+        this.role = role;
+    }
 }

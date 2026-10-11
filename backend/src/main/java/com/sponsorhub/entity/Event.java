@@ -7,13 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "events")
-@Getter
-@Setter
 public class Event
 {
     @Id
@@ -32,4 +28,54 @@ public class Event
 
     @Column(name = "Event_Date")
     private LocalDate held_on;
+
+    public Integer getEvent_id()
+    {
+        return event_id;
+    }
+
+    public void setEvent_id(Integer event_id)
+    {
+        this.event_id = event_id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getSociety()
+    {
+        return society;
+    }
+
+    public void setSociety(String society)
+    {
+        this.society = society;
+    }
+
+    public String getHeld_month()
+    {
+        return held_month;
+    }
+
+    public void setHeld_month(String held_month)
+    {
+        this.held_month = held_month;
+    }
+
+    public LocalDate getHeld_on()
+    {
+        return held_on;
+    }
+
+    public void setHeld_on(LocalDate held_on)
+    {
+        this.held_on = held_on;
+    }
 }
