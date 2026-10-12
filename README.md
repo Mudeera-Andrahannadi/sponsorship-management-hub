@@ -24,10 +24,12 @@ Spring Boot 3.3.4 on Java 21, built with the Maven wrapper in `backend/`. It con
 
 ```
 cd backend
-DB_PASS=your_mysql_password ./mvnw spring-boot:run
+DB_PASS=your_mysql_password JWT_SECRET=any_string_of_32_or_more_characters ./mvnw spring-boot:run
 ```
 
-`DB_PASS` is required. `DB_USER` (default `root`), `DB_HOST` (default `localhost`) and `DB_PORT` (default `3306`) are optional.
+`DB_PASS` and `JWT_SECRET` are required. `DB_USER` (default `root`), `DB_HOST` (default `localhost`), `DB_PORT` (default `3306`) and `CORS_ORIGIN` (default `http://localhost:5173`) are optional.
+
+Anyone can register, but `/api/auth/register` only ever creates a Student. Admins are seeded or added by another admin. Login returns a JWT that lasts 8 hours.
 
 `./mvnw test` starts a throwaway MySQL container and loads `db/init.sql` into it, so Docker has to be running.
 
