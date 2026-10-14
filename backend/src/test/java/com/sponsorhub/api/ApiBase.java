@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,28 +12,41 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.MountableFile;
 
 @SpringBootTest(properties = "hub.jwt-secret=test-secret-test-secret-test-secret-123")
 @AutoConfigureMockMvc
-@Testcontainers(disabledWithoutDocker = true)
+@EnabledIf("dockerUp")
 abstract class ApiBase
 {
-    @Container
-    static MySQLContainer<?> db = new MySQLContainer<>("mysql:8.0")
-        .withDatabaseName("sponsorship_hub")
-        .withCommand("--lower-case-table-names=1")
-        .withCopyFileToContainer(MountableFile.forHostPath("../db/init.sql"), "/docker-entrypoint-initdb.d/init.sql");
+    private static MySQLContainer<?> box;
+
+    static boolean dockerUp()
+    {
+        return DockerClientFactory.instance().isDockerAvailable();
+    }
+
+    static synchronized MySQLContainer<?> db()
+    {
+        if (box == null)
+        {
+            box = new MySQLContainer<>("mysql:8.0")
+                .withDatabaseName("sponsorship_hub")
+                .withCommand("--lower-case-table-names=1")
+                .withCopyFileToContainer(MountableFile.forHostPath("../db/init.sql"), "/docker-entrypoint-initdb.d/init.sql");
+            box.start();
+        }
+        return box;
+    }
 
     @DynamicPropertySource
     static void wire(DynamicPropertyRegistry reg)
     {
-        reg.add("spring.datasource.url", db::getJdbcUrl);
-        reg.add("spring.datasource.username", db::getUsername);
-        reg.add("spring.datasource.password", db::getPassword);
+        reg.add("spring.datasource.url", () -> db().getJdbcUrl());
+        reg.add("spring.datasource.username", () -> db().getUsername());
+        reg.add("spring.datasource.password", () -> db().getPassword());
     }
 
     @Autowired

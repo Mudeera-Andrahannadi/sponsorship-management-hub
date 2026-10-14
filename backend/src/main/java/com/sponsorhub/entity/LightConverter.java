@@ -13,7 +13,7 @@ public class LightConverter implements AttributeConverter<Light, String>
         {
             return null;
         }
-        return light.name().replace('_', ' ');
+        return light.label();
     }
 
     @Override

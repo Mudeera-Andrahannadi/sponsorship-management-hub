@@ -4,5 +4,10 @@ public enum Light
 {
     Available,
     In_Progress,
-    Locked
+    Locked;
+
+    public String label()
+    {
+        return name().replace('_', ' ');
+    }
 }

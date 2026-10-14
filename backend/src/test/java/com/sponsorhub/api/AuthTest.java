@@ -54,6 +54,6 @@ class AuthTest extends ApiBase
     {
         mvc.perform(get("/api/companies")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/companies").header("Authorization", "Bearer not.a.token")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/companies").header("Authorization", login("sachini.r@eng.uni.example"))).andExpect(status().isNotFound());
+        mvc.perform(get("/api/companies").header("Authorization", login("sachini.r@eng.uni.example"))).andExpect(status().isOk());
     }
 }
