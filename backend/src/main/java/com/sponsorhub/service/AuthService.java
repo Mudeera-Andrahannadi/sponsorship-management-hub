@@ -29,6 +29,11 @@ public class AuthService
 
     public TokenView signup(SignupForm form, Role role)
     {
+        return token(create(form, role));
+    }
+
+    public User create(SignupForm form, Role role)
+    {
         User user = new User();
         user.setName(form.name());
         user.setReg_no(form.reg_no());
@@ -37,7 +42,7 @@ public class AuthService
         user.setRole(role);
         try
         {
-            return token(user_repo.saveAndFlush(user));
+            return user_repo.saveAndFlush(user);
         }
         catch (DataIntegrityViolationException ex)
         {

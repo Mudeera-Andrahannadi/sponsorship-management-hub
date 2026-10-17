@@ -1,8 +1,11 @@
 package com.sponsorhub.repository;
 
+import com.sponsorhub.dto.Ending;
+import com.sponsorhub.dto.LightCount;
 import com.sponsorhub.entity.Company;
 import com.sponsorhub.entity.Light;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,6 +29,19 @@ public interface CompanyRepository extends JpaRepository<Company, Integer>
         + "where c.comp_id = :comp_id and c.status = :busy and c.lock_by = :user_id")
     int releaseRow(@Param("comp_id") Integer comp_id, @Param("user_id") Integer user_id,
         @Param("busy") Light busy, @Param("free") Light free);
+
+    @Query("select new com.sponsorhub.dto.LightCount(c.status, count(c)) from Company c group by c.status")
+    List<LightCount> counts();
+
+    @Query("select new com.sponsorhub.dto.Ending(c.comp_id, c.name, c.status, c.lock_until, u.name) "
+        + "from Company c left join User u on u.user_id = c.lock_by "
+        + "where c.status <> :free and c.lock_until between :now and :soon order by c.lock_until")
+    List<Ending> endingRows(@Param("now") LocalDateTime now, @Param("soon") LocalDateTime soon, @Param("free") Light free);
+
+    default List<Ending> ending(LocalDateTime now, LocalDateTime soon)
+    {
+        return endingRows(now, soon, Light.Available);
+    }
 
     default int claim(Integer comp_id, Integer user_id, LocalDateTime until, LocalDateTime now)
     {

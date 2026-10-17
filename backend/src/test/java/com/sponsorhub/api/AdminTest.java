@@ -1,6 +1,8 @@
 package com.sponsorhub.api;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -77,6 +79,42 @@ class AdminTest extends ApiBase
             .andExpect(jsonPath("$.phone").value("+94 11 555 0999"));
         mvc.perform(delete("/api/companies/" + comp_id).header("Authorization", token)).andExpect(status().isNoContent());
         mvc.perform(delete("/api/companies/" + comp_id).header("Authorization", token)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void analyticsShowsTotalsAndEndingLocks() throws Exception
+    {
+        String token = login(ADMIN);
+        String json = mvc.perform(post("/api/companies").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Ending Soon Co\"}"))
+            .andReturn().getResponse().getContentAsString();
+        Integer comp_id = JsonPath.read(json, "$.comp_id");
+        mvc.perform(post("/api/admin/companies/" + comp_id + "/lock").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"days\":1}"))
+            .andExpect(status().isOk());
+        mvc.perform(get("/api/admin/analytics").header("Authorization", token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.lights['In Progress']").isNumber())
+            .andExpect(jsonPath("$.top_sponsors[0].name").value("IFS"))
+            .andExpect(jsonPath("$.by_event.length()", greaterThanOrEqualTo(5)))
+            .andExpect(jsonPath("$.ending[?(@.name=='Ending Soon Co')]").isNotEmpty());
+        mvc.perform(get("/api/admin/analytics").header("Authorization", login("sachini.r@eng.uni.example")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminManagesUsers() throws Exception
+    {
+        String token = login(ADMIN);
+        String body = "{\"name\":\"Second Admin\",\"reg_no\":\"STAFF-002\",\"email\":\"second.admin@eng.uni.example\",\"password\":\"changeme-123\",\"role\":\"Admin\"}";
+        mvc.perform(post("/api/admin/users").header("Authorization", login("sachini.r@eng.uni.example")).contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isForbidden());
+        mvc.perform(post("/api/admin/users").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.role").value("Admin"));
+        mvc.perform(post("/api/admin/users").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isConflict());
+        mvc.perform(get("/api/admin/users?role=Student").header("Authorization", token))
+            .andExpect(jsonPath("$.length()", greaterThanOrEqualTo(6)))
+            .andExpect(jsonPath("$[?(@.role=='Admin')]").isEmpty());
     }
 
     @Test

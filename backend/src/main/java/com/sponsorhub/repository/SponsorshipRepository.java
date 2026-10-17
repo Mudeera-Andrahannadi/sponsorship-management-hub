@@ -1,8 +1,10 @@
 package com.sponsorhub.repository;
 
 import com.sponsorhub.dto.HistoryRow;
+import com.sponsorhub.dto.Total;
 import com.sponsorhub.entity.Sponsorship;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +18,16 @@ public interface SponsorshipRepository extends JpaRepository<Sponsorship, Intege
         + "where (:comp_id is null or s.comp_id = :comp_id) and (:event_id is null or s.event_id = :event_id) "
         + "order by s.asked_on desc, s.deal_id desc")
     List<HistoryRow> rows(@Param("comp_id") Integer comp_id, @Param("event_id") Integer event_id);
+
+    @Query("select new com.sponsorhub.dto.Total(e.name, sum(s.amount)) "
+        + "from Sponsorship s join Event e on e.event_id = s.event_id "
+        + "where s.status = com.sponsorhub.entity.Outcome.Approved "
+        + "group by e.event_id, e.name order by sum(s.amount) desc")
+    List<Total> byEvent();
+
+    @Query("select new com.sponsorhub.dto.Total(c.name, sum(s.amount)) "
+        + "from Sponsorship s join Company c on c.comp_id = s.comp_id "
+        + "where s.status = com.sponsorhub.entity.Outcome.Approved "
+        + "group by c.comp_id, c.name order by sum(s.amount) desc")
+    List<Total> bySponsor(Pageable page);
 }
