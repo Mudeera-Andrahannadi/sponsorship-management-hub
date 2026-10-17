@@ -78,6 +78,11 @@ public class LockService
         return one(find(comp_id), me, LocalDateTime.now());
     }
 
+    public CompanyView show(Integer comp_id, Me me)
+    {
+        return one(find(comp_id), me, LocalDateTime.now());
+    }
+
     public Company find(Integer comp_id)
     {
         return comp_repo.findById(comp_id)
