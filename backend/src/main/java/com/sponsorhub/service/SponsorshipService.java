@@ -102,7 +102,11 @@ public class SponsorshipService
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This request was already decided");
         }
         deal.setStatus(result);
-        Company comp = locks.find(deal.getComp_id());
+        settle(locks.find(deal.getComp_id()), deal, result);
+    }
+
+    private void settle(Company comp, Sponsorship deal, Outcome result)
+    {
         if (result == Outcome.Approved)
         {
             comp.setStatus(Light.Locked);
