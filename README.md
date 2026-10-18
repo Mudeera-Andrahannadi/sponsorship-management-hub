@@ -33,6 +33,36 @@ Anyone can register, but `/api/auth/register` only ever creates a Student. Admin
 
 `./mvnw test` starts a throwaway MySQL container and loads `db/init.sql` into it, so Docker has to be running.
 
+## How locking works
+
+A student on an active committee claims a company, and it turns yellow for 7 days. Logging a pitch for it restarts the 7 days. If nothing happens, the company goes back to green by itself (a job runs every minute, and every list call checks too). When the admin approves a sponsorship the company turns red for 183 days. Rejecting it frees the company.
+
+Both lengths are defaults. The admin can change them for a single company, and can lock or unlock a company by hand.
+
+Two students claiming the same company at the same moment is safe. The claim is one conditional `UPDATE`, so only one of them gets it and the other gets a 409 that says who has it.
+
+## API
+
+Everything except register and login needs `Authorization: Bearer <token>`.
+
+| Route | Who | What it does |
+|---|---|---|
+| `POST /api/auth/register`, `/login` | anyone | sign up as a student, get a token |
+| `GET /api/companies?field=&status=` | any user | directory with live status and days left |
+| `POST /api/companies/{id}/lock`, `/release` | student | claim or give back a company |
+| `POST /api/companies`, `PUT`, `DELETE /api/companies/{id}` | admin | manage the directory |
+| `GET /api/events`, `POST /api/events` | any user, admin | list events, create one |
+| `POST /api/committees/assign`, `GET /api/committees`, `PATCH /api/committees/{id}` | admin | put students on committees, switch them off |
+| `GET /api/committees/mine` | any user | events the student is active on |
+| `POST /api/sponsorships` | student | log a pitch for a company you hold |
+| `PATCH /api/sponsorships/{id}/status` | student, admin | edit your pending pitch; only the admin can approve or reject |
+| `GET /api/history`, `/company/{id}`, `/event/{id}` | any user | sponsorship history |
+| `PUT /api/admin/companies/{id}/lock-days`, `POST .../lock`, `.../unlock` | admin | per-company lengths, manual lock and unlock |
+| `GET /api/admin/analytics` | admin | counts per colour, money per event, top sponsors, locks ending in 48 hours |
+| `GET /api/admin/users`, `POST /api/admin/users` | admin | list users, add an admin or student |
+
+`./mvnw test` covers all of this against a real MySQL container.
+
 ## Sample logins
 
 Every seeded user has the password `Hub@2026`.
