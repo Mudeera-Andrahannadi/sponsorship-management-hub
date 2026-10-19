@@ -87,6 +87,12 @@ public class SponsorshipService
             && comp.getLock_until() != null && comp.getLock_until().isAfter(now);
     }
 
+    private boolean heldByOther(Company comp, Sponsorship deal)
+    {
+        return comp.getStatus() != Light.Available && comp.getLock_until() != null
+            && comp.getLock_until().isAfter(LocalDateTime.now()) && !deal.getHandler().equals(comp.getLock_by());
+    }
+
     private void decide(Sponsorship deal, Outcome result, boolean admin)
     {
         if (!admin)
@@ -109,6 +115,11 @@ public class SponsorshipService
     {
         if (result == Outcome.Approved)
         {
+            if (heldByOther(comp, deal))
+            {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Another society holds this company right now. Unlock it first, then approve");
+            }
             comp.setStatus(Light.Locked);
             comp.setLock_until(LocalDateTime.now().plusDays(rules.coolFor(comp)));
             comp.setLock_by(deal.getHandler());

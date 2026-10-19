@@ -84,6 +84,25 @@ class LockTest extends ApiBase
     }
 
     @Test
+    void aStudentCanHoldOnlyThreeAtOnce() throws Exception
+    {
+        String student = login("ishara.g@eng.uni.example");
+        Integer first = newCompany("Cap Test One");
+        for (String name : List.of("Cap Test Two", "Cap Test Three"))
+        {
+            mvc.perform(post("/api/companies/" + newCompany(name) + "/lock").header("Authorization", student))
+                .andExpect(status().isOk());
+        }
+        mvc.perform(post("/api/companies/" + first + "/lock").header("Authorization", student)).andExpect(status().isOk());
+        mvc.perform(post("/api/companies/" + newCompany("Cap Test Four") + "/lock").header("Authorization", student))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message").value(containsString("already holding")));
+        mvc.perform(post("/api/companies/" + first + "/release").header("Authorization", student)).andExpect(status().isOk());
+        mvc.perform(post("/api/companies/" + newCompany("Cap Test Five") + "/lock").header("Authorization", student))
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void releaseWorksOnlyForTheHolder() throws Exception
     {
         mvc.perform(post("/api/companies/8/lock").header("Authorization", login("sachini.r@eng.uni.example")))
@@ -103,8 +122,8 @@ class LockTest extends ApiBase
         comp.setLock_until(LocalDateTime.now().minusHours(1));
         comp.setLock_by(2);
         comp_repo.saveAndFlush(comp);
-        mvc.perform(post("/api/companies/10/lock").header("Authorization", login("tharushi.j@eng.uni.example")))
+        mvc.perform(post("/api/companies/10/lock").header("Authorization", login("nuwan.s@eng.uni.example")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.held_by").value("Tharushi Jayasinghe"));
+            .andExpect(jsonPath("$.held_by").value("Nuwan Silva"));
     }
 }

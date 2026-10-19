@@ -9,11 +9,19 @@ public class Rules
 {
     private final int hold_days;
     private final int cool_days;
+    private final int max_holds;
 
-    public Rules(@Value("${hub.hold-days}") int hold_days, @Value("${hub.cool-days}") int cool_days)
+    public Rules(@Value("${hub.hold-days}") int hold_days, @Value("${hub.cool-days}") int cool_days,
+        @Value("${hub.max-holds}") int max_holds)
     {
         this.hold_days = hold_days;
         this.cool_days = cool_days;
+        this.max_holds = max_holds;
+    }
+
+    public int maxHolds()
+    {
+        return max_holds;
     }
 
     public int holdFor(Company comp)

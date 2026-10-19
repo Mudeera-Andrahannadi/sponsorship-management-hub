@@ -60,6 +60,11 @@ public class LockService
         }
         Company comp = find(comp_id);
         LocalDateTime now = LocalDateTime.now();
+        if (comp_repo.held(me.user_id(), now) >= rules.maxHolds())
+        {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "You are already holding " + rules.maxHolds() + " companies. Release one before claiming another");
+        }
         if (comp_repo.claim(comp_id, me.user_id(), now.plusDays(rules.holdFor(comp)), now) == 0)
         {
             throw new ResponseStatusException(HttpStatus.CONFLICT, taken(find(comp_id)));

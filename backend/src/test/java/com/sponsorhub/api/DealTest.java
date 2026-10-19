@@ -71,6 +71,22 @@ class DealTest extends ApiBase
     }
 
     @Test
+    void approvalWaitsWhenAnotherSocietyHoldsTheCompany() throws Exception
+    {
+        Integer comp_id = newCompany("Race Test Co");
+        String first = login(SACHINI);
+        String second = login(DILSHAN);
+        claim(first, comp_id);
+        Integer old_deal = log(first, comp_id, 3);
+        mvc.perform(post("/api/admin/companies/" + comp_id + "/unlock").header("Authorization", login(ADMIN))).andExpect(status().isOk());
+        claim(second, comp_id);
+        decide(login(ADMIN), old_deal, "Approved", 409);
+        decide(login(ADMIN), old_deal, "Rejected", 200);
+        mvc.perform(get("/api/companies").header("Authorization", second))
+            .andExpect(jsonPath("$[?(@.comp_id==" + comp_id + ")].mine", contains(true)));
+    }
+
+    @Test
     void logNeedsAHoldAndACommitteeSeat() throws Exception
     {
         String student = login(SACHINI);

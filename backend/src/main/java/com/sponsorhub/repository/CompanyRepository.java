@@ -38,6 +38,14 @@ public interface CompanyRepository extends JpaRepository<Company, Integer>
         + "where c.status <> :free and c.lock_until between :now and :soon order by c.lock_until")
     List<Ending> endingRows(@Param("now") LocalDateTime now, @Param("soon") LocalDateTime soon, @Param("free") Light free);
 
+    @Query("select count(c) from Company c where c.lock_by = :user_id and c.status = :busy and c.lock_until > :now")
+    long holding(@Param("user_id") Integer user_id, @Param("now") LocalDateTime now, @Param("busy") Light busy);
+
+    default long held(Integer user_id, LocalDateTime now)
+    {
+        return holding(user_id, now, Light.In_Progress);
+    }
+
     default List<Ending> ending(LocalDateTime now, LocalDateTime soon)
     {
         return endingRows(now, soon, Light.Available);

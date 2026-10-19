@@ -37,6 +37,8 @@ Anyone can register, but `/api/auth/register` only ever creates a Student. Admin
 
 A student on an active committee claims a company, and it turns yellow for 7 days. Logging a pitch for it restarts the 7 days. If nothing happens, the company goes back to green by itself (a job runs every minute, and every list call checks too). When the admin approves a sponsorship the company turns red for 183 days. Rejecting it frees the company.
 
+A student can hold at most 3 companies at once (`hub.max-holds`). The admin can't approve a pitch while a different society holds the company at that moment; unlock it first.
+
 Both lengths are defaults. The admin can change them for a single company, and can lock or unlock a company by hand.
 
 Two students claiming the same company at the same moment is safe. The claim is one conditional `UPDATE`, so only one of them gets it and the other gets a 409 that says who has it.

@@ -52,6 +52,15 @@ abstract class ApiBase
     @Autowired
     MockMvc mvc;
 
+    Integer newCompany(String name) throws Exception
+    {
+        String json = mvc.perform(post("/api/companies").header("Authorization", login("nimali.perera@eng.uni.example"))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"" + name + "\"}"))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(json, "$.comp_id");
+    }
+
     String login(String email) throws Exception
     {
         String body = "{\"email\":\"" + email + "\",\"password\":\"Hub@2026\"}";
