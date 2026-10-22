@@ -1,9 +1,24 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider } from './auth.jsx';
+import Layout from './components/Layout.jsx';
+import Login from './pages/Login.jsx';
+import Companies from './pages/Companies.jsx';
+
 export default function App()
 {
     return (
-        <main className="mx-auto max-w-3xl p-6">
-            <h1 className="text-xl font-semibold">Corporate Outreach &amp; Sponsorship Hub</h1>
-            <p className="mt-2 text-mute">Project setup is done. The company board comes next.</p>
-        </main>
+        <BrowserRouter>
+            <AuthProvider>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route element={<Layout />}>
+                        <Route index element={<Companies />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+                <Toaster position="bottom-right" />
+            </AuthProvider>
+        </BrowserRouter>
     );
 }
