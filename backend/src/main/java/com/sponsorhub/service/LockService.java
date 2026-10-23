@@ -125,6 +125,6 @@ public class LockService
         boolean mine = me.user_id().equals(comp.getLock_by());
         return new CompanyView(comp.getComp_id(), comp.getName(), comp.getContact(), comp.getJob(), comp.getField(),
             comp.getEmail(), comp.getPhone(), comp.getStatus().label(), comp.getLock_until(), left,
-            names.get(comp.getLock_by()), mine);
+            names.get(comp.getLock_by()), mine, rules.holdFor(comp));
     }
 }

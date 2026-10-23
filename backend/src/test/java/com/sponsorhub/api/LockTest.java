@@ -50,7 +50,8 @@ class LockTest extends ApiBase
         mvc.perform(post("/api/companies/1/lock").header("Authorization", login("sachini.r@eng.uni.example")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("In Progress"))
-            .andExpect(jsonPath("$.mine").value(true));
+            .andExpect(jsonPath("$.mine").value(true))
+            .andExpect(jsonPath("$.hold_days").value(7));
         mvc.perform(post("/api/companies/1/lock").header("Authorization", login("dilshan.f@eng.uni.example")))
             .andExpect(status().isConflict());
         mvc.perform(post("/api/companies/3/lock").header("Authorization", login("dilshan.f@eng.uni.example")))

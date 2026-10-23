@@ -14,6 +14,7 @@ public record CompanyView(
     LocalDateTime lock_until,
     Long days_left,
     String held_by,
-    boolean mine)
+    boolean mine,
+    Integer hold_days)
 {
 }
