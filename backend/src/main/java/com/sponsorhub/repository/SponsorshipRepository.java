@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface SponsorshipRepository extends JpaRepository<Sponsorship, Integer>
 {
-    @Query("select new com.sponsorhub.dto.HistoryRow(s.deal_id, s.comp_id, c.name, s.event_id, e.name, u.name, "
+    @Query("select new com.sponsorhub.dto.HistoryRow(s.deal_id, s.comp_id, c.name, s.event_id, e.name, u.name, s.handler, "
         + "s.amount, s.status, s.asked_on, s.notes) "
         + "from Sponsorship s join Company c on c.comp_id = s.comp_id join Event e on e.event_id = s.event_id "
         + "join User u on u.user_id = s.handler "

@@ -11,6 +11,7 @@ public record HistoryRow(
     Integer event_id,
     String event,
     String handler,
+    Integer handler_id,
     BigDecimal amount,
     Outcome status,
     LocalDate asked_on,

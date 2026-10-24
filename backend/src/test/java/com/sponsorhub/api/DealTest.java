@@ -55,7 +55,8 @@ class DealTest extends ApiBase
         mvc.perform(get("/api/history/company/11").header("Authorization", student))
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].company").value("LSEG Technology"))
-            .andExpect(jsonPath("$[0].status").value("Approved"));
+            .andExpect(jsonPath("$[0].status").value("Approved"))
+            .andExpect(jsonPath("$[0].handler_id").value(2));
     }
 
     @Test
