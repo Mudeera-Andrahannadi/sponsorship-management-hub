@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { post } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useFresh, useLoad, useRefresh } from '../hooks.js';
-import Icon from '../components/Icon.jsx';
+import Toolbar from '../components/Toolbar.jsx';
 import Confirm from '../components/Confirm.jsx';
 import CompanyRow, { COLS } from '../components/CompanyRow.jsx';
 import CompanyDetail from '../components/CompanyDetail.jsx';
@@ -38,32 +38,6 @@ function match(term, filter)
         }
         return !needle || [item.name, item.field, item.contact].some((text) => (text || '').toLowerCase().includes(needle));
     };
-}
-
-function Toolbar({ term, on_term, filter, on_filter, counts })
-{
-    return (
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative sm:w-80">
-                <Icon name="search" className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-mute" />
-                <input
-                    type="search"
-                    className="field pl-8"
-                    aria-label="Search companies"
-                    placeholder="Search name, field or contact"
-                    value={term}
-                    onChange={(evt) => on_term(evt.target.value)}
-                />
-            </div>
-            <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-1">
-                {FILTERS.map(([key, label]) => (
-                    <button key={key} aria-pressed={filter === key} onClick={() => on_filter(key)} className={'btn ' + (filter === key ? 'btn-on' : 'btn-quiet')}>
-                        {label} <span className="num text-mute">{counts[key]}</span>
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
 }
 
 function Group({ group, items, is_admin, fresh, on_pick })
@@ -158,7 +132,7 @@ export default function Companies()
             <p className="mt-1 text-mute">
                 {counts.Available} of {counts.all} companies are available right now.{mine > 0 ? ' You are holding ' + mine + '.' : ''}
             </p>
-            <Toolbar term={term} on_term={set_term} filter={filter} on_filter={set_filter} counts={counts} />
+            <Toolbar term={term} on_term={set_term} hint="Search name, field or contact" filters={FILTERS} filter={filter} on_filter={set_filter} counts={counts} />
             {error && (
                 <p role="alert" className="mt-4 flex flex-wrap items-center gap-3 text-lock">
                     {error}
@@ -168,7 +142,7 @@ export default function Companies()
             {loading && <Skeleton />}
             {!loading && shown.length === 0 && !error && <Nothing term={term} on_clear={clear} total={list.length} />}
             {shown.length > 0 && (
-                <div aria-hidden="true" className={'mt-4 -mb-4 hidden px-3 pb-1 text-xs text-mute md:grid ' + COLS}>
+                <div aria-hidden="true" className={'mt-4 -mb-4 hidden gap-x-4 px-3 pb-1 text-xs text-mute md:grid ' + COLS}>
                     <span>Status</span><span>Company</span><span>Contact</span><span>Hold</span><span />
                 </div>
             )}
