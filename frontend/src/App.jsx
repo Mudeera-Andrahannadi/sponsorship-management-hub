@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx';
 import Companies from './pages/Companies.jsx';
 import Events from './pages/Events.jsx';
 import History from './pages/History.jsx';
+import Admin from './pages/Admin.jsx';
 
 export default function App()
 {
@@ -18,6 +19,7 @@ export default function App()
                         <Route index element={<Companies />} />
                         <Route path="events" element={<Events />} />
                         <Route path="history" element={<History />} />
+                        <Route path="admin" element={<Admin />} />
                     </Route>
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

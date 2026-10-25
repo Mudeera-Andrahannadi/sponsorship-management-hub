@@ -8,7 +8,7 @@ export function holds(item)
     return item.mine && item.status === 'In Progress';
 }
 
-function Hold({ item })
+export function Hold({ item })
 {
     if (item.status === 'Available')
     {
