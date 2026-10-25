@@ -15,6 +15,8 @@ public record CompanyView(
     Long days_left,
     String held_by,
     boolean mine,
-    Integer hold_days)
+    Integer hold_days,
+    Integer lock_days,
+    Integer cool_days)
 {
 }

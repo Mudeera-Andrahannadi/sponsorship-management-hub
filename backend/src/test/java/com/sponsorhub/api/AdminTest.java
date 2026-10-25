@@ -28,7 +28,9 @@ class AdminTest extends ApiBase
             .andExpect(status().isOk());
         mvc.perform(post("/api/companies/" + comp_id + "/lock").header("Authorization", login("tharushi.j@eng.uni.example")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.days_left").value(3));
+            .andExpect(jsonPath("$.days_left").value(3))
+            .andExpect(jsonPath("$.lock_days").value(3))
+            .andExpect(jsonPath("$.cool_days").doesNotExist());
     }
 
     @Test
