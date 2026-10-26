@@ -15,13 +15,12 @@ const COPY =
 function Switch({ mode, on_pick })
 {
     return (
-        <div role="tablist" aria-label="Sign in or create an account" className="mb-6 flex gap-5 border-b border-line">
+        <div role="group" aria-label="Sign in or create an account" className="mb-6 flex gap-5 border-b border-line">
             {[['in', 'Sign in'], ['up', 'Create account']].map(([key, label]) => (
                 <button
                     key={key}
-                    role="tab"
                     type="button"
-                    aria-selected={mode === key}
+                    aria-pressed={mode === key}
                     onClick={() => on_pick(key)}
                     className={'-mb-px border-b-2 pb-2 text-sm transition-colors ' + (mode === key ? 'border-accent font-medium' : 'border-transparent text-mute')}
                 >

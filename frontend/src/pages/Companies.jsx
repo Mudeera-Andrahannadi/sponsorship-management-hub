@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { post } from '../api.js';
 import { useAuth } from '../auth.jsx';
+import { match, tally } from '../filters.js';
 import { useFresh, useLoad, useRefresh } from '../hooks.js';
 import Toolbar from '../components/Toolbar.jsx';
 import Confirm from '../components/Confirm.jsx';
@@ -20,25 +21,8 @@ const FILTERS = [
     ['Locked', 'Locked']
 ];
 
-function tally(list)
-{
-    const counts = { all: list.length, Available: 0, 'In Progress': 0, Locked: 0 };
-    list.forEach((item) => counts[item.status]++);
-    return counts;
-}
-
-function match(term, filter)
-{
-    const needle = term.trim().toLowerCase();
-    return (item) =>
-    {
-        if (filter !== 'all' && item.status !== filter)
-        {
-            return false;
-        }
-        return !needle || [item.name, item.field, item.contact].some((text) => (text || '').toLowerCase().includes(needle));
-    };
-}
+const KEYS = FILTERS.slice(1).map(([key]) => key);
+const FIELDS = ['name', 'field', 'contact'];
 
 function useBoard()
 {
@@ -54,7 +38,7 @@ function useBoard()
         set_term('');
         set_filter('all');
     };
-    return { ...loaded, list, fresh, term, set_term, filter, set_filter, clear, counts: tally(list), shown: list.filter(match(term, filter)) };
+    return { ...loaded, list, fresh, term, set_term, filter, set_filter, clear, counts: tally(list, KEYS), shown: list.filter(match(term, filter, FIELDS)) };
 }
 
 function Group({ group, items, is_admin, fresh, on_pick })

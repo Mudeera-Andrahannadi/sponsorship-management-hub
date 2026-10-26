@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { patch } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useLoad } from '../hooks.js';
+import { match, tally } from '../filters.js';
 import { money } from '../format.js';
 import Confirm from '../components/Confirm.jsx';
 import DealRow, { DEAL_COLS } from '../components/DealRow.jsx';
@@ -15,25 +16,8 @@ const FILTERS = [
     ['Rejected', 'Rejected']
 ];
 
-function tally(rows)
-{
-    const counts = { all: rows.length, Pending: 0, Approved: 0, Rejected: 0 };
-    rows.forEach((row) => counts[row.status]++);
-    return counts;
-}
-
-function match(term, filter)
-{
-    const needle = term.trim().toLowerCase();
-    return (row) =>
-    {
-        if (filter !== 'all' && row.status !== filter)
-        {
-            return false;
-        }
-        return !needle || [row.company, row.event, row.handler, row.notes].some((text) => (text || '').toLowerCase().includes(needle));
-    };
-}
+const KEYS = FILTERS.slice(1).map(([key]) => key);
+const FIELDS = ['company', 'event', 'handler', 'notes'];
 
 async function decide(row, status, reload)
 {
@@ -96,7 +80,7 @@ export default function History()
     const [act, set_act] = useState({ kind: '', row: null, open: false });
 
     const all = data || [];
-    const rows = all.filter(match(term, filter));
+    const rows = all.filter(match(term, filter, FIELDS));
     const raised = all.filter((row) => row.status === 'Approved').reduce((sum, row) => sum + Number(row.amount), 0);
     const clear = () =>
     {
@@ -110,7 +94,7 @@ export default function History()
             <p className="mt-1 text-mute">
                 {all.length} {all.length === 1 ? 'pitch' : 'pitches'}, {money(raised)} approved. Look here before you call a company.
             </p>
-            <Toolbar term={term} on_term={set_term} hint="Search company, event or person" filters={FILTERS} filter={filter} on_filter={set_filter} counts={tally(all)} />
+            <Toolbar term={term} on_term={set_term} hint="Search company, event or person" filters={FILTERS} filter={filter} on_filter={set_filter} counts={tally(all, KEYS)} />
             {error && <p role="alert" className="mt-4 text-lock">{error}</p>}
             {loading && <p className="mt-8 text-mute">Loading…</p>}
             {!loading && rows.length === 0 && !error && <Nothing total={all.length} on_clear={clear} />}

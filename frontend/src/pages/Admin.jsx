@@ -28,12 +28,11 @@ export default function Admin()
     return (
         <section>
             <h1 className="text-xl font-semibold">Admin</h1>
-            <div role="tablist" aria-label="Admin sections" className="mt-3 flex flex-wrap gap-x-5 border-b border-line">
+            <div role="group" aria-label="Admin sections" className="mt-3 flex flex-wrap gap-x-5 border-b border-line">
                 {PARTS.map(([key, label]) => (
                     <button
                         key={key}
-                        role="tab"
-                        aria-selected={part === key}
+                        aria-pressed={part === key}
                         onClick={() => set_part(key)}
                         className={'-mb-px whitespace-nowrap border-b-2 pb-2 text-sm transition-colors ' + (part === key ? 'border-accent font-medium' : 'border-transparent text-mute')}
                     >

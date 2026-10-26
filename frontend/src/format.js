@@ -5,7 +5,7 @@ export function days_text(count)
 
 export function money(amount)
 {
-    return 'LKR ' + Number(amount).toLocaleString('en-LK', { maximumFractionDigits: 0 });
+    return 'LKR ' + Number(amount).toLocaleString('en-LK', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 export function day_text(text)
