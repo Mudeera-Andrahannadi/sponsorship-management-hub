@@ -40,6 +40,23 @@ function match(term, filter)
     };
 }
 
+function useBoard()
+{
+    const loaded = useLoad('/companies');
+    const [term, set_term] = useState('');
+    const [filter, set_filter] = useState('all');
+    const fresh = useFresh(loaded.data);
+    useRefresh(loaded.reload);
+
+    const list = loaded.data || [];
+    const clear = () =>
+    {
+        set_term('');
+        set_filter('all');
+    };
+    return { ...loaded, list, fresh, term, set_term, filter, set_filter, clear, counts: tally(list), shown: list.filter(match(term, filter)) };
+}
+
 function Group({ group, items, is_admin, fresh, on_pick })
 {
     if (items.length === 0)
@@ -75,18 +92,35 @@ function Skeleton()
     );
 }
 
-function Nothing({ term, on_clear, total })
+function Feedback({ board })
 {
-    if (total === 0)
+    if (board.error)
+    {
+        return (
+            <p role="alert" className="mt-4 flex flex-wrap items-center gap-3 text-lock">
+                {board.error}
+                <button className="btn" onClick={board.reload}>Try again</button>
+            </p>
+        );
+    }
+    if (board.loading)
+    {
+        return <Skeleton />;
+    }
+    if (board.list.length === 0)
     {
         return <p className="mt-8 text-mute">The directory is empty. An admin can add companies from the Admin tab.</p>;
     }
-    return (
-        <div className="mt-8">
-            <p>No company matches {term ? '“' + term + '”' : 'that filter'}.</p>
-            <button className="btn mt-3" onClick={on_clear}>Clear search and filter</button>
-        </div>
-    );
+    if (board.shown.length === 0)
+    {
+        return (
+            <div className="mt-8">
+                <p>No company matches {board.term ? '“' + board.term + '”' : 'that filter'}.</p>
+                <button className="btn mt-3" onClick={board.clear}>Clear search and filter</button>
+            </div>
+        );
+    }
+    return null;
 }
 
 async function claim(item, reload)
@@ -103,71 +137,49 @@ async function release(item, reload)
     return item.name + ' is back on the board.';
 }
 
+function Dialogs({ pick, close, on_pick, reload, is_admin })
+{
+    const item = pick.item;
+    const is = (kind) => pick.open && pick.kind === kind;
+    return (
+        <>
+            <Confirm open={is('claim')} title={item ? 'Claim ' + item.name + '?' : ''} confirm="Claim it" run={() => claim(item, reload)} on_close={close}>
+                <p>You will hold it for {item ? item.hold_days : ''} days. Log a pitch to restart the clock. If nothing happens, it goes back on the board.</p>
+            </Confirm>
+            <Confirm open={is('release')} title={item ? 'Release ' + item.name + '?' : ''} confirm="Release" run={() => release(item, reload)} on_close={close}>
+                <p>Other societies can claim it straight away.</p>
+            </Confirm>
+            <CompanyDetail open={is('detail')} item={item} is_admin={is_admin} on_close={close} on_pick={on_pick} />
+        </>
+    );
+}
+
 export default function Companies()
 {
     const { is_admin } = useAuth();
-    const { data, error, loading, reload } = useLoad('/companies');
-    const [term, set_term] = useState('');
-    const [filter, set_filter] = useState('all');
+    const board = useBoard();
     const [pick, set_pick] = useState({ kind: '', item: null, open: false });
-    const fresh = useFresh(data);
-    useRefresh(reload);
-
-    const list = data || [];
-    const counts = tally(list);
-    const shown = list.filter(match(term, filter));
-    const mine = list.filter((item) => item.mine && item.status === 'In Progress').length;
-    const item = pick.item;
-    const on_pick = (kind, target) => set_pick({ kind, item: target, open: true });
+    const on_pick = (kind, item) => set_pick({ kind, item, open: true });
     const close = () => set_pick((old) => ({ ...old, open: false }));
-    const clear = () =>
-    {
-        set_term('');
-        set_filter('all');
-    };
+    const mine = board.list.filter((item) => item.mine && item.status === 'In Progress').length;
 
     return (
         <section>
             <h1 className="text-xl font-semibold">Companies</h1>
             <p className="mt-1 text-mute">
-                {counts.Available} of {counts.all} companies are available right now.{mine > 0 ? ' You are holding ' + mine + '.' : ''}
+                {board.counts.Available} of {board.counts.all} companies are available right now.{mine > 0 ? ' You are holding ' + mine + '.' : ''}
             </p>
-            <Toolbar term={term} on_term={set_term} hint="Search name, field or contact" filters={FILTERS} filter={filter} on_filter={set_filter} counts={counts} />
-            {error && (
-                <p role="alert" className="mt-4 flex flex-wrap items-center gap-3 text-lock">
-                    {error}
-                    <button className="btn" onClick={reload}>Try again</button>
-                </p>
-            )}
-            {loading && <Skeleton />}
-            {!loading && shown.length === 0 && !error && <Nothing term={term} on_clear={clear} total={list.length} />}
-            {shown.length > 0 && (
+            <Toolbar term={board.term} on_term={board.set_term} hint="Search name, field or contact" filters={FILTERS} filter={board.filter} on_filter={board.set_filter} counts={board.counts} />
+            <Feedback board={board} />
+            {board.shown.length > 0 && (
                 <div aria-hidden="true" className={'mt-4 -mb-4 hidden gap-x-4 px-3 pb-1 text-xs text-mute md:grid ' + COLS}>
                     <span>Status</span><span>Company</span><span>Contact</span><span>Hold</span><span />
                 </div>
             )}
             {GROUPS.map((group) => (
-                <Group key={group.key} group={group} items={shown.filter((row) => row.status === group.key)} is_admin={is_admin} fresh={fresh} on_pick={on_pick} />
+                <Group key={group.key} group={group} items={board.shown.filter((row) => row.status === group.key)} is_admin={is_admin} fresh={board.fresh} on_pick={on_pick} />
             ))}
-            <Confirm
-                open={pick.open && pick.kind === 'claim'}
-                title={item ? 'Claim ' + item.name + '?' : ''}
-                confirm="Claim it"
-                run={() => claim(item, reload)}
-                on_close={close}
-            >
-                <p>You will hold it for {item ? item.hold_days : ''} days. Log a pitch to restart the clock. If nothing happens, it goes back on the board.</p>
-            </Confirm>
-            <Confirm
-                open={pick.open && pick.kind === 'release'}
-                title={item ? 'Release ' + item.name + '?' : ''}
-                confirm="Release"
-                run={() => release(item, reload)}
-                on_close={close}
-            >
-                <p>Other societies can claim it straight away.</p>
-            </Confirm>
-            <CompanyDetail open={pick.open && pick.kind === 'detail'} item={item} is_admin={is_admin} on_close={close} on_pick={on_pick} />
+            <Dialogs pick={pick} close={close} on_pick={on_pick} reload={board.reload} is_admin={is_admin} />
         </section>
     );
 }

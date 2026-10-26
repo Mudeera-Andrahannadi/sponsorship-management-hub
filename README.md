@@ -2,7 +2,7 @@
 
 Student societies keep emailing the same companies for sponsorships, and the companies get tired of it. This app lets a committee check if a company is free, hold it for a while, and log how the pitch went, so two societies don't chase the same company at once.
 
-The database and the Spring Boot project setup are done so far.
+The database, the backend and the frontend are done. Docker is next.
 
 ## Database
 
@@ -32,6 +32,22 @@ DB_PASS=your_mysql_password JWT_SECRET=any_string_of_32_or_more_characters ./mvn
 Anyone can register, but `/api/auth/register` only ever creates a Student. Admins are seeded or added by another admin. Login returns a JWT that lasts 8 hours.
 
 `./mvnw test` starts a throwaway MySQL container and loads `db/init.sql` into it, so Docker has to be running.
+
+## Frontend
+
+React 19 with Vite and Tailwind 4, in `frontend/`. Start the backend first, then:
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
+It runs on http://localhost:5173 and sends `/api` calls to the backend on port 8080. Light and dark follow the system setting.
+
+The npm scripts start Vite through `node` directly. On Windows, npm's own shims break on folder names that contain an `&`, and this project's folder has one.
+
+Students see the board, their events and the history. Admins also get an Admin tab with an overview, the company directory with lock controls, committees and users.
 
 ## How locking works
 

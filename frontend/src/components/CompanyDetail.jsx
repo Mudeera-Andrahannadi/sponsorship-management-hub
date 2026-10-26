@@ -42,6 +42,19 @@ function Past({ rows, loading })
     );
 }
 
+function Facts({ item })
+{
+    return (
+        <dl className="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-2">
+            <Line label="Status"><Badge status={item.status} /></Line>
+            <Line label="Contact">{[item.contact, item.job].filter(Boolean).join(', ')}</Line>
+            <Line label="Email">{item.email && <a className="text-accent underline" href={'mailto:' + item.email}>{item.email}</a>}</Line>
+            <Line label="Phone">{item.phone && <a className="text-accent underline" href={'tel:' + item.phone.replace(/\s/g, '')}>{item.phone}</a>}</Line>
+            <Line label="Industry">{item.field}</Line>
+        </dl>
+    );
+}
+
 export default function CompanyDetail({ open, item, is_admin, on_close, on_pick })
 {
     const { data, loading, reload } = useLoad(item ? '/history/company/' + item.comp_id : null);
@@ -62,13 +75,7 @@ export default function CompanyDetail({ open, item, is_admin, on_close, on_pick 
     const can_claim = !is_admin && item.status === 'Available';
     return (
         <Modal open={open} title={item.name} on_close={on_close}>
-            <dl className="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-2">
-                <Line label="Status"><Badge status={item.status} /></Line>
-                <Line label="Contact">{[item.contact, item.job].filter(Boolean).join(', ')}</Line>
-                <Line label="Email">{item.email && <a className="text-accent underline" href={'mailto:' + item.email}>{item.email}</a>}</Line>
-                <Line label="Phone">{item.phone && <a className="text-accent underline" href={'tel:' + item.phone.replace(/\s/g, '')}>{item.phone}</a>}</Line>
-                <Line label="Industry">{item.field}</Line>
-            </dl>
+            <Facts item={item} />
             <h3 className="mt-5 mb-2 font-semibold">Past sponsorships</h3>
             <Past rows={data} loading={loading} />
             <div className="mt-5 flex justify-end gap-2">

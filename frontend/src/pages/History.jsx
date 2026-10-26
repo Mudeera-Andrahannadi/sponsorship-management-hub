@@ -42,6 +42,20 @@ async function decide(row, status, reload)
     return status === 'Approved' ? row.company + ' is locked for its cooldown.' : 'Rejected the pitch to ' + row.company + '.';
 }
 
+function Ledger({ rows, me, is_admin, on_act })
+{
+    return (
+        <div className="mt-6">
+            <div aria-hidden="true" className={'hidden gap-x-4 px-3 pb-1 text-xs text-mute lg:grid ' + DEAL_COLS}>
+                <span>Company</span><span>Event</span><span className="text-right">Amount</span><span>Status</span><span />
+            </div>
+            <ul className="overflow-hidden rounded-lg border border-line bg-panel">
+                {rows.map((item) => <DealRow key={item.deal_id} row={item} me={me} is_admin={is_admin} on_act={on_act} />)}
+            </ul>
+        </div>
+    );
+}
+
 function Nothing({ total, on_clear })
 {
     if (total === 0)
@@ -56,6 +70,23 @@ function Nothing({ total, on_clear })
     );
 }
 
+function Dialogs({ act, close, reload })
+{
+    const row = act.row;
+    const is = (kind) => act.open && act.kind === kind;
+    return (
+        <>
+            <Confirm open={is('approve')} title={row ? 'Approve the pitch to ' + row.company + '?' : ''} confirm="Approve" run={() => decide(row, 'Approved', reload)} on_close={close}>
+                <p>{row ? money(row.amount) + ' for ' + row.event + '. ' : ''}The company goes into its cooldown and the pitch is no longer editable by the society.</p>
+            </Confirm>
+            <Confirm open={is('reject')} title={row ? 'Reject the pitch to ' + row.company + '?' : ''} confirm="Reject" danger run={() => decide(row, 'Rejected', reload)} on_close={close}>
+                <p>{row ? row.handler + ' will see it as rejected. ' : ''}If they still hold the company, it goes back on the board.</p>
+            </Confirm>
+            <EditDialog open={is('edit')} row={row} on_close={close} on_done={reload} />
+        </>
+    );
+}
+
 export default function History()
 {
     const { me, is_admin } = useAuth();
@@ -67,9 +98,6 @@ export default function History()
     const all = data || [];
     const rows = all.filter(match(term, filter));
     const raised = all.filter((row) => row.status === 'Approved').reduce((sum, row) => sum + Number(row.amount), 0);
-    const row = act.row;
-    const on_act = (kind, target) => set_act({ kind, row: target, open: true });
-    const close = () => set_act((old) => ({ ...old, open: false }));
     const clear = () =>
     {
         set_term('');
@@ -86,36 +114,8 @@ export default function History()
             {error && <p role="alert" className="mt-4 text-lock">{error}</p>}
             {loading && <p className="mt-8 text-mute">Loading…</p>}
             {!loading && rows.length === 0 && !error && <Nothing total={all.length} on_clear={clear} />}
-            {rows.length > 0 && (
-                <div className="mt-6">
-                    <div aria-hidden="true" className={'hidden gap-x-4 px-3 pb-1 text-xs text-mute lg:grid ' + DEAL_COLS}>
-                        <span>Company</span><span>Event</span><span className="text-right">Amount</span><span>Status</span><span />
-                    </div>
-                    <ul className="overflow-hidden rounded-lg border border-line bg-panel">
-                        {rows.map((item) => <DealRow key={item.deal_id} row={item} me={me} is_admin={is_admin} on_act={on_act} />)}
-                    </ul>
-                </div>
-            )}
-            <Confirm
-                open={act.open && act.kind === 'approve'}
-                title={row ? 'Approve the pitch to ' + row.company + '?' : ''}
-                confirm="Approve"
-                run={() => decide(row, 'Approved', reload)}
-                on_close={close}
-            >
-                <p>{row ? money(row.amount) + ' for ' + row.event + '. ' : ''}The company goes into its cooldown and the pitch is no longer editable by the society.</p>
-            </Confirm>
-            <Confirm
-                open={act.open && act.kind === 'reject'}
-                title={row ? 'Reject the pitch to ' + row.company + '?' : ''}
-                confirm="Reject"
-                danger
-                run={() => decide(row, 'Rejected', reload)}
-                on_close={close}
-            >
-                <p>{row ? row.handler + ' will see it as rejected. ' : ''}If they still hold the company, it goes back on the board.</p>
-            </Confirm>
-            <EditDialog open={act.open && act.kind === 'edit'} row={row} on_close={close} on_done={reload} />
+            {rows.length > 0 && <Ledger rows={rows} me={me} is_admin={is_admin} on_act={(kind, row) => set_act({ kind, row, open: true })} />}
+            <Dialogs act={act} close={() => set_act((old) => ({ ...old, open: false }))} reload={reload} />
         </section>
     );
 }

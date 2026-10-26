@@ -30,6 +30,36 @@ export function useLoad(url)
     return { ...state, reload };
 }
 
+export function useAction(task)
+{
+    const [busy, set_busy] = useState(false);
+    const [problem, set_problem] = useState('');
+
+    async function fire(evt)
+    {
+        if (evt)
+        {
+            evt.preventDefault();
+        }
+        set_busy(true);
+        set_problem('');
+        try
+        {
+            await task();
+        }
+        catch (err)
+        {
+            set_problem(error_text(err));
+        }
+        finally
+        {
+            set_busy(false);
+        }
+    }
+
+    return { busy, problem, fire, clear: () => set_problem('') };
+}
+
 export function useRefresh(reload)
 {
     useEffect(() =>

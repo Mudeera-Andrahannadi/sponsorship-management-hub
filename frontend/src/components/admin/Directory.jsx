@@ -8,10 +8,25 @@ import { CompanyDialog, LengthDialog, LockDialog } from './CompanyDialogs.jsx';
 
 const COLS = 'lg:grid-cols-[9.5rem_minmax(0,1.3fr)_minmax(0,1fr)_auto]';
 
+function Buttons({ item, on_act })
+{
+    const locked = item.status !== 'Available';
+    const quiet = (kind, text, label, extra) => (
+        <button className={'btn btn-quiet ' + (extra || '')} onClick={() => on_act(kind, item)} aria-label={label + ' ' + item.name}>{text}</button>
+    );
+    return (
+        <div className="mt-1 flex flex-wrap gap-1 lg:mt-0 lg:justify-end">
+            {quiet('edit', 'Edit', 'Edit')}
+            {quiet('lengths', 'Lengths', 'Lock lengths for')}
+            {quiet(locked ? 'unlock' : 'lock', locked ? 'Unlock' : 'Lock', locked ? 'Unlock' : 'Lock')}
+            {quiet('delete', 'Delete', 'Delete', 'btn-danger')}
+        </div>
+    );
+}
+
 function Row({ item, on_act })
 {
     const custom = item.lock_days != null || item.cool_days != null;
-    const locked = item.status !== 'Available';
     return (
         <li className={'grid items-center gap-x-4 gap-y-1 border-t border-line px-3 py-3 first:border-t-0 ' + COLS}>
             <div><Badge status={item.status} /></div>
@@ -23,25 +38,15 @@ function Row({ item, on_act })
                 <Hold item={item} />
                 {custom && <p className="text-[0.8125rem] text-mute">Custom lengths</p>}
             </div>
-            <div className="mt-1 flex flex-wrap gap-1 lg:mt-0 lg:justify-end">
-                <button className="btn btn-quiet" onClick={() => on_act('edit', item)} aria-label={'Edit ' + item.name}>Edit</button>
-                <button className="btn btn-quiet" onClick={() => on_act('lengths', item)} aria-label={'Lock lengths for ' + item.name}>Lengths</button>
-                <button className="btn btn-quiet" onClick={() => on_act(locked ? 'unlock' : 'lock', item)} aria-label={(locked ? 'Unlock ' : 'Lock ') + item.name}>{locked ? 'Unlock' : 'Lock'}</button>
-                <button className="btn btn-quiet btn-danger" onClick={() => on_act('delete', item)} aria-label={'Delete ' + item.name}>Delete</button>
-            </div>
+            <Buttons item={item} on_act={on_act} />
         </li>
     );
 }
 
-export default function Directory()
+function Dialogs({ act, close, reload })
 {
-    const { data, error, loading, reload } = useLoad('/companies');
-    const [act, set_act] = useState({ kind: '', item: null, open: false });
     const item = act.item;
-    const on_act = (kind, target) => set_act({ kind, item: target, open: true });
-    const close = () => set_act((old) => ({ ...old, open: false }));
     const is = (kind) => act.open && act.kind === kind;
-
     const unlock = async () =>
     {
         await post('/admin/companies/' + item.comp_id + '/unlock');
@@ -54,6 +59,26 @@ export default function Directory()
         await reload();
         return item.name + ' deleted.';
     };
+    return (
+        <>
+            <CompanyDialog open={is('edit')} item={item} on_close={close} on_done={reload} />
+            <LockDialog open={is('lock')} item={item} on_close={close} on_done={reload} />
+            <LengthDialog open={is('lengths')} item={item} on_close={close} on_done={reload} />
+            <Confirm open={is('unlock')} title={item ? 'Unlock ' + item.name + '?' : ''} confirm="Unlock" run={unlock} on_close={close}>
+                <p>It goes back on the board right away, whoever was holding it.</p>
+            </Confirm>
+            <Confirm open={is('delete')} title={item ? 'Delete ' + item.name + '?' : ''} confirm="Delete" danger run={remove} on_close={close}>
+                <p>This cannot be undone. A company that already has sponsorship history cannot be deleted.</p>
+            </Confirm>
+        </>
+    );
+}
+
+export default function Directory()
+{
+    const { data, error, loading, reload } = useLoad('/companies');
+    const [act, set_act] = useState({ kind: '', item: null, open: false });
+    const on_act = (kind, item) => set_act({ kind, item, open: true });
 
     return (
         <div>
@@ -66,15 +91,7 @@ export default function Directory()
             <ul className="mt-4 overflow-hidden rounded-lg border border-line bg-panel">
                 {(data || []).map((row) => <Row key={row.comp_id} item={row} on_act={on_act} />)}
             </ul>
-            <CompanyDialog open={is('edit')} item={item} on_close={close} on_done={reload} />
-            <LockDialog open={is('lock')} item={item} on_close={close} on_done={reload} />
-            <LengthDialog open={is('lengths')} item={item} on_close={close} on_done={reload} />
-            <Confirm open={is('unlock')} title={item ? 'Unlock ' + item.name + '?' : ''} confirm="Unlock" run={unlock} on_close={close}>
-                <p>It goes back on the board right away, whoever was holding it.</p>
-            </Confirm>
-            <Confirm open={is('delete')} title={item ? 'Delete ' + item.name + '?' : ''} confirm="Delete" danger run={remove} on_close={close}>
-                <p>This cannot be undone. A company that already has sponsorship history cannot be deleted.</p>
-            </Confirm>
+            <Dialogs act={act} close={() => set_act((old) => ({ ...old, open: false }))} reload={reload} />
         </div>
     );
 }

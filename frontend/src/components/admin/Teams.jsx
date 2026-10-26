@@ -34,12 +34,26 @@ function AssignFields({ on_close, on_done })
     );
 }
 
-export default function Teams()
+function TeamRow({ row, on_toggle })
 {
-    const { data, error, loading, reload } = useLoad('/committees');
-    const [open, set_open] = useState(false);
+    const label = (row.active ? 'Switch off ' : 'Switch on ') + row.name + ' for ' + row.event;
+    return (
+        <li className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line px-3 py-2.5 first:border-t-0">
+            <div className="min-w-0">
+                <p className="font-medium">{row.name}</p>
+                <p className="text-[0.8125rem] text-mute">{row.event} · {row.post}</p>
+            </div>
+            <div className="flex items-center gap-3">
+                <span className={row.active ? 'text-free' : 'text-mute'}>{row.active ? 'Active' : 'Inactive'}</span>
+                <button className="btn btn-quiet" onClick={() => on_toggle(row)} aria-label={label}>{row.active ? 'Switch off' : 'Switch on'}</button>
+            </div>
+        </li>
+    );
+}
 
-    async function toggle(row)
+function useToggle(reload)
+{
+    return async (row) =>
     {
         try
         {
@@ -51,7 +65,15 @@ export default function Teams()
         {
             toast.error(error_text(err));
         }
-    }
+    };
+}
+
+export default function Teams()
+{
+    const { data, error, loading, reload } = useLoad('/committees');
+    const [open, set_open] = useState(false);
+    const toggle = useToggle(reload);
+    const close = () => set_open(false);
 
     return (
         <div>
@@ -62,23 +84,10 @@ export default function Teams()
             {error && <p role="alert" className="mt-4 text-lock">{error}</p>}
             {loading && <p className="mt-6 text-mute">Loading…</p>}
             <ul className="mt-4 overflow-hidden rounded-lg border border-line bg-panel">
-                {(data || []).map((row) => (
-                    <li key={row.team_id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-line px-3 py-2.5 first:border-t-0">
-                        <div className="min-w-0">
-                            <p className="font-medium">{row.name}</p>
-                            <p className="text-[0.8125rem] text-mute">{row.event} · {row.post}</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className={row.active ? 'text-free' : 'text-mute'}>{row.active ? 'Active' : 'Inactive'}</span>
-                            <button className="btn btn-quiet" onClick={() => toggle(row)} aria-label={(row.active ? 'Switch off ' : 'Switch on ') + row.name + ' for ' + row.event}>
-                                {row.active ? 'Switch off' : 'Switch on'}
-                            </button>
-                        </div>
-                    </li>
-                ))}
+                {(data || []).map((row) => <TeamRow key={row.team_id} row={row} on_toggle={toggle} />)}
             </ul>
-            <Modal open={open} title="Add a student to an event" on_close={() => set_open(false)}>
-                <AssignFields on_close={() => set_open(false)} on_done={reload} />
+            <Modal open={open} title="Add a student to an event" on_close={close}>
+                <AssignFields on_close={close} on_done={reload} />
             </Modal>
         </div>
     );

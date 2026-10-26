@@ -59,32 +59,42 @@ function Section({ title, events, mine_ids, history, on_log })
     );
 }
 
-export default function Events()
+function Lead({ is_admin, count })
 {
-    const { is_admin } = useAuth();
+    if (is_admin)
+    {
+        return <p className="mt-1 text-mute">Every event the societies are raising money for.</p>;
+    }
+    return <p className="mt-1 text-mute">You are on {count} {count === 1 ? 'committee.' : 'committees.'}</p>;
+}
+
+function useEvents(is_admin)
+{
     const events = useLoad('/events');
     const mine = useLoad('/committees/mine');
     const history = useLoad('/history');
     const companies = useLoad(is_admin ? null : '/companies');
-    const [dialog, set_dialog] = useState({ kind: '', event: null, open: false });
-
-    const list = events.data || [];
-    const mine_ids = new Set((mine.data || []).map((event) => event.event_id));
-    const today = new Date().toISOString().slice(0, 10);
     const held = (companies.data || []).filter((item) => item.mine && item.status === 'In Progress');
     const refresh = () => Promise.all([history.reload(), companies.reload()]);
+    return { events, mine, held, refresh, history: history.data || [], mine_ids: new Set((mine.data || []).map((event) => event.event_id)) };
+}
+
+export default function Events()
+{
+    const { is_admin } = useAuth();
+    const { events, mine, held, refresh, history, mine_ids } = useEvents(is_admin);
+    const [dialog, set_dialog] = useState({ kind: '', event: null, open: false });
+    const list = events.data || [];
+    const today = new Date().toISOString().slice(0, 10);
+    const shared = { mine_ids, history, on_log: (event) => set_dialog({ kind: 'pitch', event, open: true }) };
     const close = () => set_dialog((old) => ({ ...old, open: false }));
-    const log = (event) => set_dialog({ kind: 'pitch', event, open: true });
-    const shared = { mine_ids, history: history.data || [], on_log: log };
 
     return (
         <section>
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h1 className="text-xl font-semibold">Events</h1>
-                    <p className="mt-1 text-mute">
-                        {is_admin ? 'Every event the societies are raising money for.' : 'You are on ' + mine_ids.size + (mine_ids.size === 1 ? ' committee.' : ' committees.')}
-                    </p>
+                    <Lead is_admin={is_admin} count={mine_ids.size} />
                 </div>
                 {is_admin && <button className="btn btn-primary" onClick={() => set_dialog({ kind: 'event', event: null, open: true })}>New event</button>}
             </div>

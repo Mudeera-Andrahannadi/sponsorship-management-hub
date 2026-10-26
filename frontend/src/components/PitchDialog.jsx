@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
-import { error_text, post } from '../api.js';
+import { post } from '../api.js';
 import Field from './Field.jsx';
+import FormShell from './FormShell.jsx';
 import Modal from './Modal.jsx';
 
 function PitchForm({ event, held, on_close, on_done })
@@ -10,45 +10,22 @@ function PitchForm({ event, held, on_close, on_done })
     const [comp_id, set_comp_id] = useState(held.length === 1 ? String(held[0].comp_id) : '');
     const [amount, set_amount] = useState('');
     const [notes, set_notes] = useState('');
-    const [busy, set_busy] = useState(false);
-    const [problem, set_problem] = useState('');
 
-    async function submit(evt)
+    const run = async () =>
     {
-        evt.preventDefault();
-        set_busy(true);
-        set_problem('');
-        try
-        {
-            await post('/sponsorships', { comp_id: Number(comp_id), event_id: event.event_id, amount: Number(amount), notes: notes.trim() || null });
-            toast.success('Pitch logged. The clock on that company has restarted.');
-            await on_done();
-            on_close();
-        }
-        catch (err)
-        {
-            set_problem(error_text(err));
-        }
-        finally
-        {
-            set_busy(false);
-        }
-    }
+        await post('/sponsorships', { comp_id: Number(comp_id), event_id: event.event_id, amount: Number(amount), notes: notes.trim() || null });
+        return 'Pitch logged. The clock on that company has restarted.';
+    };
 
     return (
-        <form onSubmit={submit} className="space-y-4">
+        <FormShell run={run} go="Log pitch" on_close={on_close} on_done={on_done}>
             <Field as="select" label="Company" value={comp_id} onChange={(evt) => set_comp_id(evt.target.value)} required data-autofocus="">
                 <option value="" disabled>Choose a company you hold</option>
                 {held.map((item) => <option key={item.comp_id} value={item.comp_id}>{item.name}</option>)}
             </Field>
             <Field label="Amount you asked for (LKR)" type="number" min="1" step="any" inputMode="decimal" value={amount} onChange={(evt) => set_amount(evt.target.value)} required />
             <Field as="textarea" rows={3} label="Notes" hint="Who you spoke to, what they said, what comes next." value={notes} onChange={(evt) => set_notes(evt.target.value)} />
-            <p role="alert" className="min-h-5 text-sm text-lock">{problem}</p>
-            <div className="flex justify-end gap-2">
-                <button type="button" className="btn" onClick={on_close}>Cancel</button>
-                <button className="btn btn-primary" disabled={busy}>{busy ? 'One moment…' : 'Log pitch'}</button>
-            </div>
-        </form>
+        </FormShell>
     );
 }
 

@@ -1,42 +1,41 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
-export default function Modal({ open, title, on_close, children })
+function useDialog(open)
 {
     const box = useRef(null);
-    const head = useId();
     const [shown, set_shown] = useState(open);
 
     useEffect(() =>
     {
         const node = box.current;
-        if (open)
-        {
-            set_shown(true);
-            if (!node.open)
-            {
-                node.showModal();
-            }
-            const first = node.querySelector('[data-autofocus]');
-            if (first)
-            {
-                first.focus();
-            }
-            return undefined;
-        }
-        if (node.open)
+        if (!open)
         {
             node.close();
+            const timer = setTimeout(() => set_shown(false), 220);
+            return () => clearTimeout(timer);
         }
-        const timer = setTimeout(() => set_shown(false), 220);
-        return () => clearTimeout(timer);
+        set_shown(true);
+        if (!node.open)
+        {
+            node.showModal();
+        }
+        node.querySelector('[data-autofocus]')?.focus();
+        return undefined;
     }, [open]);
 
+    return { box, live: open || shown };
+}
+
+export default function Modal({ open, title, on_close, children })
+{
+    const head = useId();
+    const { box, live } = useDialog(open);
     const on_click = (evt) => evt.target === box.current && on_close();
 
     return (
         <dialog ref={box} className="modal" aria-labelledby={head} onClose={on_close} onClick={on_click}>
-            {(open || shown) && (
+            {live && (
                 <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
                     <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-3">
                         <h2 id={head} className="pt-1 text-base font-semibold">{title}</h2>
