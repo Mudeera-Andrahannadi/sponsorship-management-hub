@@ -30,7 +30,10 @@ export default function Layout()
             <a href="#main" className="sr-only rounded bg-panel px-3 py-2 focus:not-sr-only focus:absolute focus:left-3 focus:top-3">Skip to content</a>
             <header className="border-b border-line bg-panel">
                 <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 pt-3 sm:px-6">
-                    <span className="font-semibold">Sponsorship Hub</span>
+                    <span className="font-semibold">
+                        <span className="md:hidden">Sponsorship Hub</span>
+                        <span className="hidden md:inline">Corporate Outreach &amp; Sponsorship Management Hub</span>
+                    </span>
                     <div className="flex items-center gap-2">
                         <span className="hidden text-mute sm:inline">{me.name}{is_admin ? ' · Admin' : ''}</span>
                         <button className="btn btn-quiet" onClick={leave}>Sign out</button>

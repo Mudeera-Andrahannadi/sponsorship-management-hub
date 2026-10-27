@@ -57,7 +57,10 @@ function Page({ children })
     return (
         <div className="min-h-dvh">
             <header className="border-b border-line bg-panel">
-                <div className="mx-auto max-w-6xl px-4 py-3 font-semibold sm:px-6">Sponsorship Hub</div>
+                <div className="mx-auto max-w-6xl px-4 py-3 font-semibold sm:px-6">
+                    <span className="sm:hidden">Sponsorship Hub</span>
+                    <span className="hidden sm:inline">Corporate Outreach &amp; Sponsorship Management Hub</span>
+                </div>
             </header>
             <main className="mx-auto mt-10 max-w-sm px-4 sm:mt-16">{children}</main>
         </div>
