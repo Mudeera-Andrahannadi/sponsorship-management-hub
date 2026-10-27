@@ -6,13 +6,14 @@ The database, the backend and the frontend are done. Docker is next.
 
 ## Database
 
-MySQL 8.0, database `Sponsorship_Hub`, five tables: `users`, `companies`, `events`, `event_committee` and `sponsorship_history`.
+MySQL 8.0, database `sponsorship_hub` (all lowercase, so it works on Linux), five tables: `users`, `companies`, `events`, `event_committee` and `sponsorship_history`.
 
 ```
 mysql -u root -p < db/init.sql
+mysql -u root -p < db/demo.sql
 ```
 
-That creates the tables and loads the sample data. `db/verify.sql` then lists every company with its traffic light, frees any expired locks, and totals the approved money per event.
+`init.sql` creates the tables and loads the 14 companies and 5 events, all green. That is all a real deployment needs. `demo.sql` is only for trying things out: it adds sample students and an admin, committees, a few locked companies and some past pitches. Skip it on a live server. `db/verify.sql` lists every company with its traffic light, frees any expired locks, and totals the approved money per event.
 
 Status colours: green is `Available`, yellow is `In Progress` (a society is talking to them), red is `Locked` (cooldown after a sponsorship).
 
@@ -81,9 +82,6 @@ Everything except register and login needs `Authorization: Bearer <token>`.
 
 `./mvnw test` covers all of this against a real MySQL container.
 
-## Sample logins
+## Demo users
 
-Every seeded user has the password `Hub@2026`.
-
-- Admin: nimali.perera@eng.uni.example
-- Student: sachini.r@eng.uni.example
+`db/demo.sql` adds one admin and six students with `@eng.uni.example` emails, all with the same throwaway password. You can find it in `ApiBase.java` in the backend tests. The password is not written anywhere else, and these users do not exist unless you load `demo.sql`.

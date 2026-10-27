@@ -1,4 +1,4 @@
-USE Sponsorship_Hub;
+USE sponsorship_hub;
 
 SELECT Name,
     CASE WHEN Tracking_Status <> 'Available' AND Locked_Until < NOW() THEN 'Available' ELSE Tracking_Status END AS Light,

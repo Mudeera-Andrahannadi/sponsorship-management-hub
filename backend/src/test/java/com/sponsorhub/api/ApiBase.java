@@ -34,8 +34,8 @@ abstract class ApiBase
         {
             box = new MySQLContainer<>("mysql:8.0")
                 .withDatabaseName("sponsorship_hub")
-                .withCommand("--lower-case-table-names=1")
-                .withCopyFileToContainer(MountableFile.forHostPath("../db/init.sql"), "/docker-entrypoint-initdb.d/init.sql");
+                .withCopyFileToContainer(MountableFile.forHostPath("../db/init.sql"), "/docker-entrypoint-initdb.d/01-init.sql")
+                .withCopyFileToContainer(MountableFile.forHostPath("../db/demo.sql"), "/docker-entrypoint-initdb.d/02-demo.sql");
             box.start();
         }
         return box;
