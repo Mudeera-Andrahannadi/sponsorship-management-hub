@@ -2,7 +2,7 @@
 
 Student societies keep emailing the same companies for sponsorships, and the companies get tired of it. This app lets a committee check if a company is free, hold it for a while, and log how the pitch went, so two societies don't chase the same company at once.
 
-The database, the backend and the frontend are done. Docker is next.
+To run the whole thing on one machine, jump to [Docker](#docker). The other sections are for working on one part at a time.
 
 ## Database
 
@@ -49,6 +49,32 @@ It runs on http://localhost:5173 and sends `/api` calls to the backend on port 8
 The npm scripts start Vite through `node` directly. On Windows, npm's own shims break on folder names that contain an `&`, and this project's folder has one.
 
 Students see the board, their events and the history. Admins also get an Admin tab with an overview, the company directory with lock controls, committees and users.
+
+## Docker
+
+Three containers: `mysql-db`, `spring-backend` and `react-frontend` (nginx). Copy `.env.example` to `.env` and fill in four values:
+
+- `DB_PASS`: password for the `hub` database user
+- `JWT_SECRET`: a random string of 32 or more characters
+- `ADMIN_EMAIL` and `ADMIN_PASS`: the first admin account, made on the first start
+
+Then:
+
+```
+docker compose up -d --build
+```
+
+Open http://localhost (or the port in `WEB_PORT`) and sign in with the admin you set. The first start takes a minute or two while the backend builds and MySQL loads `db/init.sql`.
+
+Only nginx is exposed. It serves the React build and passes `/api` to the backend, so the browser only talks to one address. The backend and MySQL are not published to the host. Login and register are limited to 10 requests a minute per address (plus a burst of 5), and nginx also sends a content security policy.
+
+The database lives in the `db_data` volume. `init.sql` only runs when that volume is empty, so to start over:
+
+```
+docker compose down -v
+```
+
+Demo data is never loaded here. If you want it for a trial, run `db/demo.sql` against the container yourself.
 
 ## How locking works
 
