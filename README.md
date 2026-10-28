@@ -52,10 +52,10 @@ Students see the board, their events and the history. Admins also get an Admin t
 
 ## Docker
 
-Three containers: `mysql-db`, `spring-backend` and `react-frontend` (nginx). Copy `.env.example` to `.env` and fill in four values:
+Three containers: `mysql-db`, `spring-backend` and `react-frontend` (nginx). Copy `.env.example` to `.env` and fill in the four empty values. Compose refuses to start until you do:
 
 - `DB_PASS`: password for the `hub` database user
-- `JWT_SECRET`: a random string of 32 or more characters
+- `JWT_SECRET`: a random string of 32 or more characters, for example from `openssl rand -hex 32`. Never reuse one from an example, because anyone who has it can sign in as an admin
 - `ADMIN_EMAIL` and `ADMIN_PASS`: the first admin account, made on the first start
 
 Then:
@@ -67,6 +67,8 @@ docker compose up -d --build
 Open http://localhost (or the port in `WEB_PORT`) and sign in with the admin you set. The first start takes a minute or two while the backend builds and MySQL loads `db/init.sql`.
 
 Only nginx is exposed. It serves the React build and passes `/api` to the backend, so the browser only talks to one address. The backend and MySQL are not published to the host. Login and register are limited to 10 requests a minute per address (plus a burst of 5), and nginx also sends a content security policy.
+
+The container only speaks plain HTTP on port 80, so passwords and tokens are not encrypted on the way in. Put HTTPS in front of it before real people use it, with a reverse proxy or the university's load balancer.
 
 The database lives in the `db_data` volume. `init.sql` only runs when that volume is empty, so to start over:
 
