@@ -17,28 +17,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportService
 {
-    private final CompanyRepository comp_repo;
-    private final SponsorshipRepository deal_repo;
+    private final CompanyRepository compRepo;
+    private final SponsorshipRepository dealRepo;
 
-    public ReportService(CompanyRepository comp_repo, SponsorshipRepository deal_repo)
+    public ReportService(CompanyRepository compRepo, SponsorshipRepository dealRepo)
     {
-        this.comp_repo = comp_repo;
-        this.deal_repo = deal_repo;
+        this.compRepo = compRepo;
+        this.dealRepo = dealRepo;
     }
 
     @Transactional
     public Analytics analytics()
     {
         LocalDateTime now = LocalDateTime.now();
-        comp_repo.freeExpired(now);
+        compRepo.freeExpired(now);
         Map<String, Long> lights = new LinkedHashMap<>();
         for (Light light : Light.values())
         {
             lights.put(light.label(), 0L);
         }
-        comp_repo.counts().forEach(row -> lights.put(row.light().label(), row.n()));
-        List<Total> events = deal_repo.byEvent();
+        compRepo.counts().forEach(row -> lights.put(row.light().label(), row.n()));
+        List<Total> events = dealRepo.byEvent();
         BigDecimal raised = events.stream().map(Total::sum).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new Analytics(lights, raised, events, deal_repo.bySponsor(PageRequest.of(0, 5)), comp_repo.ending(now, now.plusHours(48)));
+        return new Analytics(lights, raised, events, dealRepo.bySponsor(PageRequest.of(0, 5)), compRepo.ending(now, now.plusHours(48)));
     }
 }

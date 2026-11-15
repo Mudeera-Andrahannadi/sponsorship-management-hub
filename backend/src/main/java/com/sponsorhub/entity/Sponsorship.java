@@ -20,13 +20,13 @@ public class Sponsorship
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Sponsorship_ID")
-    private Integer deal_id;
+    private Integer dealId;
 
     @Column(name = "Company_ID")
-    private Integer comp_id;
+    private Integer compId;
 
     @Column(name = "Event_ID")
-    private Integer event_id;
+    private Integer eventId;
 
     @Column(name = "Handled_By")
     private Integer handler;
@@ -40,40 +40,40 @@ public class Sponsorship
     private Outcome status;
 
     @Column(name = "Requested_Date")
-    private LocalDate asked_on;
+    private LocalDate askedOn;
 
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "Notes")
     private String notes;
 
-    public Integer getDeal_id()
+    public Integer getDealId()
     {
-        return deal_id;
+        return dealId;
     }
 
-    public void setDeal_id(Integer deal_id)
+    public void setDealId(Integer dealId)
     {
-        this.deal_id = deal_id;
+        this.dealId = dealId;
     }
 
-    public Integer getComp_id()
+    public Integer getCompId()
     {
-        return comp_id;
+        return compId;
     }
 
-    public void setComp_id(Integer comp_id)
+    public void setCompId(Integer compId)
     {
-        this.comp_id = comp_id;
+        this.compId = compId;
     }
 
-    public Integer getEvent_id()
+    public Integer getEventId()
     {
-        return event_id;
+        return eventId;
     }
 
-    public void setEvent_id(Integer event_id)
+    public void setEventId(Integer eventId)
     {
-        this.event_id = event_id;
+        this.eventId = eventId;
     }
 
     public Integer getHandler()
@@ -106,14 +106,14 @@ public class Sponsorship
         this.status = status;
     }
 
-    public LocalDate getAsked_on()
+    public LocalDate getAskedOn()
     {
-        return asked_on;
+        return askedOn;
     }
 
-    public void setAsked_on(LocalDate asked_on)
+    public void setAskedOn(LocalDate askedOn)
     {
-        this.asked_on = asked_on;
+        this.askedOn = askedOn;
     }
 
     public String getNotes()

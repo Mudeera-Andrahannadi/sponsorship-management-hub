@@ -47,26 +47,26 @@ class CrudTest
     TestEntityManager em;
 
     @Autowired
-    UserRepository user_repo;
+    UserRepository userRepo;
 
     @Autowired
-    CompanyRepository comp_repo;
+    CompanyRepository compRepo;
 
     @Autowired
-    SponsorshipRepository deal_repo;
+    SponsorshipRepository dealRepo;
 
     @Test
     void seedRowsLoad()
     {
-        long busy = comp_repo.findAll().stream().filter(item -> item.getStatus() == Light.In_Progress).count();
-        assertEquals(14, comp_repo.count());
+        long busy = compRepo.findAll().stream().filter(item -> item.getStatus() == Light.In_Progress).count();
+        assertEquals(14, compRepo.count());
         assertEquals(3, busy);
     }
 
     @Test
     void findsAdminByEmail()
     {
-        User admin = user_repo.findByEmail("nimali.perera@eng.uni.example").orElseThrow();
+        User admin = userRepo.findByEmail("nimali.perera@eng.uni.example").orElseThrow();
         assertEquals(Role.Admin, admin.getRole());
     }
 
@@ -76,32 +76,32 @@ class CrudTest
         Company comp = new Company();
         comp.setName("Test Co");
         comp.setStatus(Light.Available);
-        Integer comp_id = comp_repo.saveAndFlush(comp).getComp_id();
+        Integer compId = compRepo.saveAndFlush(comp).getCompId();
         comp.setStatus(Light.In_Progress);
-        comp.setLock_until(LocalDateTime.now().plusDays(7));
-        comp_repo.saveAndFlush(comp);
+        comp.setLockUntil(LocalDateTime.now().plusDays(7));
+        compRepo.saveAndFlush(comp);
         em.clear();
-        Company back = comp_repo.findById(comp_id).orElseThrow();
+        Company back = compRepo.findById(compId).orElseThrow();
         assertEquals(Light.In_Progress, back.getStatus());
-        comp_repo.delete(back);
-        comp_repo.flush();
-        assertFalse(comp_repo.existsById(comp_id));
+        compRepo.delete(back);
+        compRepo.flush();
+        assertFalse(compRepo.existsById(compId));
     }
 
     @Test
     void dealRoundTrip()
     {
         Sponsorship deal = new Sponsorship();
-        deal.setComp_id(1);
-        deal.setEvent_id(1);
+        deal.setCompId(1);
+        deal.setEventId(1);
         deal.setHandler(2);
         deal.setAmount(new BigDecimal("50000.00"));
         deal.setStatus(Outcome.Pending);
-        deal.setAsked_on(LocalDate.now());
+        deal.setAskedOn(LocalDate.now());
         deal.setNotes("first call went well");
-        Integer deal_id = deal_repo.saveAndFlush(deal).getDeal_id();
+        Integer dealId = dealRepo.saveAndFlush(deal).getDealId();
         em.clear();
-        Sponsorship back = deal_repo.findById(deal_id).orElseThrow();
+        Sponsorship back = dealRepo.findById(dealId).orElseThrow();
         assertEquals(Outcome.Pending, back.getStatus());
         assertEquals("first call went well", back.getNotes());
         assertEquals(0, new BigDecimal("50000.00").compareTo(back.getAmount()));

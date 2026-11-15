@@ -24,16 +24,16 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class LockService
 {
-    private final CompanyRepository comp_repo;
-    private final UserRepository user_repo;
-    private final CommitteeRepository team_repo;
+    private final CompanyRepository compRepo;
+    private final UserRepository userRepo;
+    private final CommitteeRepository teamRepo;
     private final Rules rules;
 
-    public LockService(CompanyRepository comp_repo, UserRepository user_repo, CommitteeRepository team_repo, Rules rules)
+    public LockService(CompanyRepository compRepo, UserRepository userRepo, CommitteeRepository teamRepo, Rules rules)
     {
-        this.comp_repo = comp_repo;
-        this.user_repo = user_repo;
-        this.team_repo = team_repo;
+        this.compRepo = compRepo;
+        this.userRepo = userRepo;
+        this.teamRepo = teamRepo;
         this.rules = rules;
     }
 
@@ -41,8 +41,8 @@ public class LockService
     public List<CompanyView> list(Me me, String field, String status)
     {
         LocalDateTime now = LocalDateTime.now();
-        comp_repo.freeExpired(now);
-        List<Company> found = comp_repo.findAll().stream()
+        compRepo.freeExpired(now);
+        List<Company> found = compRepo.findAll().stream()
             .filter(item -> field == null || field.equalsIgnoreCase(item.getField()))
             .filter(item -> status == null || status.equalsIgnoreCase(item.getStatus().label()))
             .sorted(Comparator.comparing(Company::getName, String.CASE_INSENSITIVE_ORDER))
@@ -52,51 +52,51 @@ public class LockService
     }
 
     @Transactional
-    public CompanyView claim(Integer comp_id, Me me)
+    public CompanyView claim(Integer compId, Me me)
     {
-        if (!team_repo.hasActive(me.user_id()))
+        if (!teamRepo.hasActive(me.userId()))
         {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only active committee members can claim a company");
         }
-        Company comp = find(comp_id);
+        Company comp = find(compId);
         LocalDateTime now = LocalDateTime.now();
-        if (comp_repo.held(me.user_id(), now) >= rules.maxHolds())
+        if (compRepo.held(me.userId(), now) >= rules.maxHolds())
         {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                 "You are already holding " + rules.maxHolds() + " companies. Release one before claiming another");
         }
-        if (comp_repo.claim(comp_id, me.user_id(), now.plusDays(rules.holdFor(comp)), now) == 0)
+        if (compRepo.claim(compId, me.userId(), now.plusDays(rules.holdFor(comp)), now) == 0)
         {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, taken(find(comp_id)));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, taken(find(compId)));
         }
-        return one(find(comp_id), me, now);
+        return one(find(compId), me, now);
     }
 
     @Transactional
-    public CompanyView release(Integer comp_id, Me me)
+    public CompanyView release(Integer compId, Me me)
     {
-        find(comp_id);
-        if (comp_repo.release(comp_id, me.user_id()) == 0)
+        find(compId);
+        if (compRepo.release(compId, me.userId()) == 0)
         {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You are not holding this company");
         }
-        return one(find(comp_id), me, LocalDateTime.now());
+        return one(find(compId), me, LocalDateTime.now());
     }
 
-    public CompanyView show(Integer comp_id, Me me)
+    public CompanyView show(Integer compId, Me me)
     {
-        return one(find(comp_id), me, LocalDateTime.now());
+        return one(find(compId), me, LocalDateTime.now());
     }
 
-    public Company find(Integer comp_id)
+    public Company find(Integer compId)
     {
-        return comp_repo.findById(comp_id)
+        return compRepo.findById(compId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such company"));
     }
 
     private String taken(Company comp)
     {
-        String until = comp.getLock_until() == null ? "" : " until " + comp.getLock_until().toLocalDate();
+        String until = comp.getLockUntil() == null ? "" : " until " + comp.getLockUntil().toLocalDate();
         if (comp.getStatus() == Light.Locked)
         {
             return "This company is in its cooldown period" + until;
@@ -111,20 +111,20 @@ public class LockService
 
     private Map<Integer, String> holders(List<Company> comps)
     {
-        Set<Integer> ids = comps.stream().map(Company::getLock_by).filter(Objects::nonNull).collect(Collectors.toSet());
-        return user_repo.findAllById(ids).stream().collect(Collectors.toMap(User::getUser_id, User::getName));
+        Set<Integer> ids = comps.stream().map(Company::getLockBy).filter(Objects::nonNull).collect(Collectors.toSet());
+        return userRepo.findAllById(ids).stream().collect(Collectors.toMap(User::getUserId, User::getName));
     }
 
     private CompanyView view(Company comp, Map<Integer, String> names, Me me, LocalDateTime now)
     {
         Long left = null;
-        if (comp.getLock_until() != null)
+        if (comp.getLockUntil() != null)
         {
-            left = Math.max(0L, (Duration.between(now, comp.getLock_until()).toMinutes() + 1439) / 1440);
+            left = Math.max(0L, (Duration.between(now, comp.getLockUntil()).toMinutes() + 1439) / 1440);
         }
-        boolean mine = me.user_id().equals(comp.getLock_by());
-        return new CompanyView(comp.getComp_id(), comp.getName(), comp.getContact(), comp.getJob(), comp.getField(),
-            comp.getEmail(), comp.getPhone(), comp.getStatus().label(), comp.getLock_until(), left,
-            names.get(comp.getLock_by()), mine, rules.holdFor(comp), comp.getLock_days(), comp.getCool_days());
+        boolean mine = me.userId().equals(comp.getLockBy());
+        return new CompanyView(comp.getCompId(), comp.getName(), comp.getContact(), comp.getJob(), comp.getField(),
+            comp.getEmail(), comp.getPhone(), comp.getStatus().label(), comp.getLockUntil(), left,
+            names.get(comp.getLockBy()), mine, rules.holdFor(comp), comp.getLockDays(), comp.getCoolDays());
     }
 }

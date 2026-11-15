@@ -15,51 +15,51 @@ public class Committee
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Committee_ID")
-    private Integer team_id;
+    private Integer teamId;
 
     @Column(name = "User_ID")
-    private Integer user_id;
+    private Integer userId;
 
     @Column(name = "Event_ID")
-    private Integer event_id;
+    private Integer eventId;
 
     @Column(name = "Position")
     private String post;
 
     @Column(name = "Assigned_Date")
-    private LocalDate assigned_on;
+    private LocalDate assignedOn;
 
     @Column(name = "Is_Active")
     private Boolean active;
 
-    public Integer getTeam_id()
+    public Integer getTeamId()
     {
-        return team_id;
+        return teamId;
     }
 
-    public void setTeam_id(Integer team_id)
+    public void setTeamId(Integer teamId)
     {
-        this.team_id = team_id;
+        this.teamId = teamId;
     }
 
-    public Integer getUser_id()
+    public Integer getUserId()
     {
-        return user_id;
+        return userId;
     }
 
-    public void setUser_id(Integer user_id)
+    public void setUserId(Integer userId)
     {
-        this.user_id = user_id;
+        this.userId = userId;
     }
 
-    public Integer getEvent_id()
+    public Integer getEventId()
     {
-        return event_id;
+        return eventId;
     }
 
-    public void setEvent_id(Integer event_id)
+    public void setEventId(Integer eventId)
     {
-        this.event_id = event_id;
+        this.eventId = eventId;
     }
 
     public String getPost()
@@ -72,14 +72,14 @@ public class Committee
         this.post = post;
     }
 
-    public LocalDate getAssigned_on()
+    public LocalDate getAssignedOn()
     {
-        return assigned_on;
+        return assignedOn;
     }
 
-    public void setAssigned_on(LocalDate assigned_on)
+    public void setAssignedOn(LocalDate assignedOn)
     {
-        this.assigned_on = assigned_on;
+        this.assignedOn = assignedOn;
     }
 
     public Boolean getActive()

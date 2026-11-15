@@ -15,7 +15,7 @@ public class Event
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Event_ID")
-    private Integer event_id;
+    private Integer eventId;
 
     @Column(name = "Name")
     private String name;
@@ -24,19 +24,19 @@ public class Event
     private String society;
 
     @Column(name = "Event_Month")
-    private String held_month;
+    private String heldMonth;
 
     @Column(name = "Event_Date")
-    private LocalDate held_on;
+    private LocalDate heldOn;
 
-    public Integer getEvent_id()
+    public Integer getEventId()
     {
-        return event_id;
+        return eventId;
     }
 
-    public void setEvent_id(Integer event_id)
+    public void setEventId(Integer eventId)
     {
-        this.event_id = event_id;
+        this.eventId = eventId;
     }
 
     public String getName()
@@ -59,23 +59,23 @@ public class Event
         this.society = society;
     }
 
-    public String getHeld_month()
+    public String getHeldMonth()
     {
-        return held_month;
+        return heldMonth;
     }
 
-    public void setHeld_month(String held_month)
+    public void setHeldMonth(String heldMonth)
     {
-        this.held_month = held_month;
+        this.heldMonth = heldMonth;
     }
 
-    public LocalDate getHeld_on()
+    public LocalDate getHeldOn()
     {
-        return held_on;
+        return heldOn;
     }
 
-    public void setHeld_on(LocalDate held_on)
+    public void setHeldOn(LocalDate heldOn)
     {
-        this.held_on = held_on;
+        this.heldOn = heldOn;
     }
 }

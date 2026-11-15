@@ -15,38 +15,38 @@ import org.junit.jupiter.api.Test;
 
 class AdminSeedTest
 {
-    private final UserRepository user_repo = mock(UserRepository.class);
+    private final UserRepository userRepo = mock(UserRepository.class);
     private final AuthService auth = mock(AuthService.class);
 
     @Test
     void makesTheFirstAdminOnAnEmptyTable()
     {
-        when(user_repo.count()).thenReturn(0L);
-        new AdminSeed(user_repo, auth, "dean@eng.uni.example", "a-long-pass").run(null);
+        when(userRepo.count()).thenReturn(0L);
+        new AdminSeed(userRepo, auth, "dean@eng.uni.example", "a-long-pass").run(null);
         verify(auth).create(any(SignupForm.class), eq(Role.Admin));
     }
 
     @Test
     void leavesExistingUsersAlone()
     {
-        when(user_repo.count()).thenReturn(3L);
-        new AdminSeed(user_repo, auth, "dean@eng.uni.example", "a-long-pass").run(null);
+        when(userRepo.count()).thenReturn(3L);
+        new AdminSeed(userRepo, auth, "dean@eng.uni.example", "a-long-pass").run(null);
         verify(auth, never()).create(any(), any());
     }
 
     @Test
     void doesNothingWithoutCredentials()
     {
-        when(user_repo.count()).thenReturn(0L);
-        new AdminSeed(user_repo, auth, "", "").run(null);
+        when(userRepo.count()).thenReturn(0L);
+        new AdminSeed(userRepo, auth, "", "").run(null);
         verify(auth, never()).create(any(), any());
     }
 
     @Test
     void refusesAShortPassword()
     {
-        when(user_repo.count()).thenReturn(0L);
-        AdminSeed seed = new AdminSeed(user_repo, auth, "dean@eng.uni.example", "short");
+        when(userRepo.count()).thenReturn(0L);
+        AdminSeed seed = new AdminSeed(userRepo, auth, "dean@eng.uni.example", "short");
         assertThrows(IllegalStateException.class, () -> seed.run(null));
     }
 }

@@ -22,15 +22,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class SponsorshipService
 {
-    private final SponsorshipRepository deal_repo;
-    private final CommitteeRepository team_repo;
+    private final SponsorshipRepository dealRepo;
+    private final CommitteeRepository teamRepo;
     private final LockService locks;
     private final Rules rules;
 
-    public SponsorshipService(SponsorshipRepository deal_repo, CommitteeRepository team_repo, LockService locks, Rules rules)
+    public SponsorshipService(SponsorshipRepository dealRepo, CommitteeRepository teamRepo, LockService locks, Rules rules)
     {
-        this.deal_repo = deal_repo;
-        this.team_repo = team_repo;
+        this.dealRepo = dealRepo;
+        this.teamRepo = teamRepo;
         this.locks = locks;
         this.rules = rules;
     }
@@ -38,32 +38,32 @@ public class SponsorshipService
     @Transactional
     public Integer log(SponsorForm form, Me me)
     {
-        if (!team_repo.isActiveIn(me.user_id(), form.event_id()))
+        if (!teamRepo.isActiveIn(me.userId(), form.eventId()))
         {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not on that event's committee");
         }
-        Company comp = locks.find(form.comp_id());
+        Company comp = locks.find(form.compId());
         LocalDateTime now = LocalDateTime.now();
         if (!holds(comp, me, now))
         {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Claim this company first. Your hold may have run out");
         }
         Sponsorship deal = new Sponsorship();
-        deal.setComp_id(form.comp_id());
-        deal.setEvent_id(form.event_id());
-        deal.setHandler(me.user_id());
+        deal.setCompId(form.compId());
+        deal.setEventId(form.eventId());
+        deal.setHandler(me.userId());
         deal.setAmount(form.amount());
         deal.setNotes(form.notes());
         deal.setStatus(Outcome.Pending);
-        deal.setAsked_on(LocalDate.now());
-        comp.setLock_until(now.plusDays(rules.holdFor(comp)));
-        return deal_repo.save(deal).getDeal_id();
+        deal.setAskedOn(LocalDate.now());
+        comp.setLockUntil(now.plusDays(rules.holdFor(comp)));
+        return dealRepo.save(deal).getDealId();
     }
 
     @Transactional
-    public void update(Integer deal_id, UpdateForm form, Me me)
+    public void update(Integer dealId, UpdateForm form, Me me)
     {
-        Sponsorship deal = deal_repo.findById(deal_id)
+        Sponsorship deal = dealRepo.findById(dealId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No such sponsorship"));
         boolean admin = me.role() == Role.Admin;
         if (form.status() != null)
@@ -76,21 +76,21 @@ public class SponsorshipService
         }
     }
 
-    public List<HistoryRow> history(Integer comp_id, Integer event_id)
+    public List<HistoryRow> history(Integer compId, Integer eventId)
     {
-        return deal_repo.rows(comp_id, event_id);
+        return dealRepo.rows(compId, eventId);
     }
 
     private boolean holds(Company comp, Me me, LocalDateTime now)
     {
-        return comp.getStatus() == Light.In_Progress && me.user_id().equals(comp.getLock_by())
-            && comp.getLock_until() != null && comp.getLock_until().isAfter(now);
+        return comp.getStatus() == Light.In_Progress && me.userId().equals(comp.getLockBy())
+            && comp.getLockUntil() != null && comp.getLockUntil().isAfter(now);
     }
 
     private boolean heldByOther(Company comp, Sponsorship deal)
     {
-        return comp.getStatus() != Light.Available && comp.getLock_until() != null
-            && comp.getLock_until().isAfter(LocalDateTime.now()) && !deal.getHandler().equals(comp.getLock_by());
+        return comp.getStatus() != Light.Available && comp.getLockUntil() != null
+            && comp.getLockUntil().isAfter(LocalDateTime.now()) && !deal.getHandler().equals(comp.getLockBy());
     }
 
     private void decide(Sponsorship deal, Outcome result, boolean admin)
@@ -108,7 +108,7 @@ public class SponsorshipService
             throw new ResponseStatusException(HttpStatus.CONFLICT, "This request was already decided");
         }
         deal.setStatus(result);
-        settle(locks.find(deal.getComp_id()), deal, result);
+        settle(locks.find(deal.getCompId()), deal, result);
     }
 
     private void settle(Company comp, Sponsorship deal, Outcome result)
@@ -121,20 +121,20 @@ public class SponsorshipService
                     "Another society holds this company right now. Unlock it first, then approve");
             }
             comp.setStatus(Light.Locked);
-            comp.setLock_until(LocalDateTime.now().plusDays(rules.coolFor(comp)));
-            comp.setLock_by(deal.getHandler());
+            comp.setLockUntil(LocalDateTime.now().plusDays(rules.coolFor(comp)));
+            comp.setLockBy(deal.getHandler());
         }
-        else if (comp.getStatus() == Light.In_Progress && deal.getHandler().equals(comp.getLock_by()))
+        else if (comp.getStatus() == Light.In_Progress && deal.getHandler().equals(comp.getLockBy()))
         {
             comp.setStatus(Light.Available);
-            comp.setLock_until(null);
-            comp.setLock_by(null);
+            comp.setLockUntil(null);
+            comp.setLockBy(null);
         }
     }
 
     private void edit(Sponsorship deal, UpdateForm form, Me me, boolean admin)
     {
-        if (!admin && !me.user_id().equals(deal.getHandler()))
+        if (!admin && !me.userId().equals(deal.getHandler()))
         {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only edit your own requests");
         }

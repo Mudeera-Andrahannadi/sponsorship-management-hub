@@ -5,16 +5,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record HistoryRow(
-    Integer deal_id,
-    Integer comp_id,
+    Integer dealId,
+    Integer compId,
     String company,
-    Integer event_id,
+    Integer eventId,
     String event,
     String handler,
-    Integer handler_id,
+    Integer handlerId,
     BigDecimal amount,
     Outcome status,
-    LocalDate asked_on,
+    LocalDate askedOn,
     String notes)
 {
 }

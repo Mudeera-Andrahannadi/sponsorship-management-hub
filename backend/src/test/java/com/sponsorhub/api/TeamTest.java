@@ -14,9 +14,9 @@ class TeamTest extends ApiBase
 {
     private static final String ADMIN = "nimali.perera@eng.uni.example";
 
-    private String assignBody(int user_id, int event_id)
+    private String assignBody(int userId, int eventId)
     {
-        return "{\"user_id\":" + user_id + ",\"event_id\":" + event_id + ",\"post\":\"Treasurer\"}";
+        return "{\"user_id\":" + userId + ",\"event_id\":" + eventId + ",\"post\":\"Treasurer\"}";
     }
 
     @Test
@@ -60,8 +60,8 @@ class TeamTest extends ApiBase
         String json = mvc.perform(post("/api/committees/assign").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content(assignBody(7, 2)))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        Integer team_id = JsonPath.read(json, "$.id");
-        mvc.perform(patch("/api/committees/" + team_id).header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"active\":false}"))
+        Integer teamId = JsonPath.read(json, "$.id");
+        mvc.perform(patch("/api/committees/" + teamId).header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"active\":false}"))
             .andExpect(status().isOk());
         mvc.perform(get("/api/committees/mine").header("Authorization", login("ishara.g@eng.uni.example")))
             .andExpect(jsonPath("$[?(@.event_id==2)]").isEmpty());

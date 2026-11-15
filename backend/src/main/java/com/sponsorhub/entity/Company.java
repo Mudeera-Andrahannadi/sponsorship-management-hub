@@ -17,7 +17,7 @@ public class Company
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Company_ID")
-    private Integer comp_id;
+    private Integer compId;
 
     @Column(name = "Name")
     private String name;
@@ -42,25 +42,25 @@ public class Company
     private Light status;
 
     @Column(name = "Locked_Until")
-    private LocalDateTime lock_until;
+    private LocalDateTime lockUntil;
 
     @Column(name = "Locked_By")
-    private Integer lock_by;
+    private Integer lockBy;
 
     @Column(name = "Lock_Days")
-    private Integer lock_days;
+    private Integer lockDays;
 
     @Column(name = "Cooldown_Days")
-    private Integer cool_days;
+    private Integer coolDays;
 
-    public Integer getComp_id()
+    public Integer getCompId()
     {
-        return comp_id;
+        return compId;
     }
 
-    public void setComp_id(Integer comp_id)
+    public void setCompId(Integer compId)
     {
-        this.comp_id = comp_id;
+        this.compId = compId;
     }
 
     public String getName()
@@ -133,43 +133,43 @@ public class Company
         this.status = status;
     }
 
-    public LocalDateTime getLock_until()
+    public LocalDateTime getLockUntil()
     {
-        return lock_until;
+        return lockUntil;
     }
 
-    public void setLock_until(LocalDateTime lock_until)
+    public void setLockUntil(LocalDateTime lockUntil)
     {
-        this.lock_until = lock_until;
+        this.lockUntil = lockUntil;
     }
 
-    public Integer getLock_by()
+    public Integer getLockBy()
     {
-        return lock_by;
+        return lockBy;
     }
 
-    public void setLock_by(Integer lock_by)
+    public void setLockBy(Integer lockBy)
     {
-        this.lock_by = lock_by;
+        this.lockBy = lockBy;
     }
 
-    public Integer getLock_days()
+    public Integer getLockDays()
     {
-        return lock_days;
+        return lockDays;
     }
 
-    public void setLock_days(Integer lock_days)
+    public void setLockDays(Integer lockDays)
     {
-        this.lock_days = lock_days;
+        this.lockDays = lockDays;
     }
 
-    public Integer getCool_days()
+    public Integer getCoolDays()
     {
-        return cool_days;
+        return coolDays;
     }
 
-    public void setCool_days(Integer cool_days)
+    public void setCoolDays(Integer coolDays)
     {
-        this.cool_days = cool_days;
+        this.coolDays = coolDays;
     }
 }
