@@ -3,7 +3,7 @@ package com.sponsorhub.dto;
 import java.time.LocalDateTime;
 
 public record CompanyView(
-    Integer comp_id,
+    Integer compId,
     String name,
     String contact,
     String job,
@@ -11,12 +11,12 @@ public record CompanyView(
     String email,
     String phone,
     String status,
-    LocalDateTime lock_until,
-    Long days_left,
-    String held_by,
+    LocalDateTime lockUntil,
+    Long daysLeft,
+    String heldBy,
     boolean mine,
-    Integer hold_days,
-    Integer lock_days,
-    Integer cool_days)
+    Integer holdDays,
+    Integer lockDays,
+    Integer coolDays)
 {
 }

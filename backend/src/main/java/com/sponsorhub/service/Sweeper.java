@@ -11,17 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 @EnableScheduling
 public class Sweeper
 {
-    private final CompanyRepository comp_repo;
+    private final CompanyRepository compRepo;
 
-    public Sweeper(CompanyRepository comp_repo)
+    public Sweeper(CompanyRepository compRepo)
     {
-        this.comp_repo = comp_repo;
+        this.compRepo = compRepo;
     }
 
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void sweep()
     {
-        comp_repo.freeExpired(LocalDateTime.now());
+        compRepo.freeExpired(LocalDateTime.now());
     }
 }

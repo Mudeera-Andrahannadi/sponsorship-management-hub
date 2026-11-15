@@ -16,13 +16,13 @@ public class User
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "User_ID")
-    private Integer user_id;
+    private Integer userId;
 
     @Column(name = "Name")
     private String name;
 
     @Column(name = "University_Reg_No")
-    private String reg_no;
+    private String regNo;
 
     @Column(name = "Email")
     private String email;
@@ -34,14 +34,14 @@ public class User
     @Column(name = "Role")
     private Role role;
 
-    public Integer getUser_id()
+    public Integer getUserId()
     {
-        return user_id;
+        return userId;
     }
 
-    public void setUser_id(Integer user_id)
+    public void setUserId(Integer userId)
     {
-        this.user_id = user_id;
+        this.userId = userId;
     }
 
     public String getName()
@@ -54,14 +54,14 @@ public class User
         this.name = name;
     }
 
-    public String getReg_no()
+    public String getRegNo()
     {
-        return reg_no;
+        return regNo;
     }
 
-    public void setReg_no(String reg_no)
+    public void setRegNo(String regNo)
     {
-        this.reg_no = reg_no;
+        this.regNo = regNo;
     }
 
     public String getEmail()

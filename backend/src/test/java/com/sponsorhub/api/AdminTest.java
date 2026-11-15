@@ -23,10 +23,10 @@ class AdminTest extends ApiBase
         String json = mvc.perform(post("/api/companies").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Short Hold Co\"}"))
             .andExpect(status().isCreated())
             .andReturn().getResponse().getContentAsString();
-        Integer comp_id = JsonPath.read(json, "$.comp_id");
-        mvc.perform(put("/api/admin/companies/" + comp_id + "/lock-days").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"lock_days\":3}"))
+        Integer compId = JsonPath.read(json, "$.comp_id");
+        mvc.perform(put("/api/admin/companies/" + compId + "/lock-days").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"lock_days\":3}"))
             .andExpect(status().isOk());
-        mvc.perform(post("/api/companies/" + comp_id + "/lock").header("Authorization", login("tharushi.j@eng.uni.example")))
+        mvc.perform(post("/api/companies/" + compId + "/lock").header("Authorization", login("tharushi.j@eng.uni.example")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.days_left").value(3))
             .andExpect(jsonPath("$.lock_days").value(3))
@@ -75,12 +75,12 @@ class AdminTest extends ApiBase
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.status").value("Available"))
             .andReturn().getResponse().getContentAsString();
-        Integer comp_id = JsonPath.read(json, "$.comp_id");
-        mvc.perform(put("/api/companies/" + comp_id).header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Test Corp\",\"phone\":\"+94 11 555 0999\"}"))
+        Integer compId = JsonPath.read(json, "$.comp_id");
+        mvc.perform(put("/api/companies/" + compId).header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Test Corp\",\"phone\":\"+94 11 555 0999\"}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.phone").value("+94 11 555 0999"));
-        mvc.perform(delete("/api/companies/" + comp_id).header("Authorization", token)).andExpect(status().isNoContent());
-        mvc.perform(delete("/api/companies/" + comp_id).header("Authorization", token)).andExpect(status().isNotFound());
+        mvc.perform(delete("/api/companies/" + compId).header("Authorization", token)).andExpect(status().isNoContent());
+        mvc.perform(delete("/api/companies/" + compId).header("Authorization", token)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -89,8 +89,8 @@ class AdminTest extends ApiBase
         String token = login(ADMIN);
         String json = mvc.perform(post("/api/companies").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Ending Soon Co\"}"))
             .andReturn().getResponse().getContentAsString();
-        Integer comp_id = JsonPath.read(json, "$.comp_id");
-        mvc.perform(post("/api/admin/companies/" + comp_id + "/lock").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"days\":1}"))
+        Integer compId = JsonPath.read(json, "$.comp_id");
+        mvc.perform(post("/api/admin/companies/" + compId + "/lock").header("Authorization", token).contentType(MediaType.APPLICATION_JSON).content("{\"days\":1}"))
             .andExpect(status().isOk());
         mvc.perform(get("/api/admin/analytics").header("Authorization", token))
             .andExpect(status().isOk())

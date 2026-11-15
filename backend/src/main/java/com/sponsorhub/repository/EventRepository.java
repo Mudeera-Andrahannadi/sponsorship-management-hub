@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Integer>
 {
-    @Query("select e from Event e join Committee t on t.event_id = e.event_id "
-        + "where t.user_id = :user_id and t.active = true order by e.held_on")
-    List<Event> activeFor(@Param("user_id") Integer user_id);
+    @Query("select e from Event e join Committee t on t.eventId = e.eventId "
+        + "where t.userId = :userId and t.active = true order by e.heldOn")
+    List<Event> activeFor(@Param("userId") Integer userId);
 }

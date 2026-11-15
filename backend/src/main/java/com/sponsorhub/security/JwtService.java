@@ -29,7 +29,7 @@ public class JwtService
     {
         Date now = new Date();
         return Jwts.builder()
-            .subject(String.valueOf(user.getUser_id()))
+            .subject(String.valueOf(user.getUserId()))
             .claim("role", user.getRole().name())
             .issuedAt(now)
             .expiration(new Date(now.getTime() + life))

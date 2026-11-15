@@ -25,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 class LockTest extends ApiBase
 {
     @Autowired
-    CompanyRepository comp_repo;
+    CompanyRepository compRepo;
 
-    private int claimCode(String token, int comp_id, CyclicBarrier gate) throws Exception
+    private int claimCode(String token, int compId, CyclicBarrier gate) throws Exception
     {
         gate.await();
-        return mvc.perform(post("/api/companies/" + comp_id + "/lock").header("Authorization", token))
+        return mvc.perform(post("/api/companies/" + compId + "/lock").header("Authorization", token))
             .andReturn().getResponse().getStatus();
     }
 
@@ -74,11 +74,11 @@ class LockTest extends ApiBase
         String first = login("tharushi.j@eng.uni.example");
         String second = login("nuwan.s@eng.uni.example");
         CyclicBarrier gate = new CyclicBarrier(2);
-        Callable<Integer> one_call = () -> claimCode(first, 5, gate);
-        Callable<Integer> two_call = () -> claimCode(second, 5, gate);
+        Callable<Integer> oneCall = () -> claimCode(first, 5, gate);
+        Callable<Integer> twoCall = () -> claimCode(second, 5, gate);
         ExecutorService pool = Executors.newFixedThreadPool(2);
-        Future<Integer> one = pool.submit(one_call);
-        Future<Integer> two = pool.submit(two_call);
+        Future<Integer> one = pool.submit(oneCall);
+        Future<Integer> two = pool.submit(twoCall);
         List<Integer> codes = List.of(one.get(), two.get()).stream().sorted().toList();
         pool.shutdown();
         assertEquals(List.of(200, 409), codes);
@@ -99,8 +99,20 @@ class LockTest extends ApiBase
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value(containsString("already holding")));
         mvc.perform(post("/api/companies/" + first + "/release").header("Authorization", student)).andExpect(status().isOk());
-        mvc.perform(post("/api/companies/" + newCompany("Cap Test Five") + "/lock").header("Authorization", student))
-            .andExpect(status().isOk());
+        Integer five = newCompany("Cap Test Five");
+        mvc.perform(post("/api/companies/" + five + "/lock").header("Authorization", student)).andExpect(status().isOk());
+
+        // one slot left and two claims at the same moment: only one may take it
+        mvc.perform(post("/api/companies/" + five + "/release").header("Authorization", student)).andExpect(status().isOk());
+        int six = newCompany("Cap Test Six");
+        int seven = newCompany("Cap Test Seven");
+        CyclicBarrier gate = new CyclicBarrier(2);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        Future<Integer> one = pool.submit(() -> claimCode(student, six, gate));
+        Future<Integer> two = pool.submit(() -> claimCode(student, seven, gate));
+        List<Integer> codes = List.of(one.get(), two.get()).stream().sorted().toList();
+        pool.shutdown();
+        assertEquals(List.of(200, 409), codes);
     }
 
     @Test
@@ -118,11 +130,11 @@ class LockTest extends ApiBase
     @Test
     void expiredLockCanBeClaimedAgain() throws Exception
     {
-        Company comp = comp_repo.findById(10).orElseThrow();
+        Company comp = compRepo.findById(10).orElseThrow();
         comp.setStatus(Light.In_Progress);
-        comp.setLock_until(LocalDateTime.now().minusHours(1));
-        comp.setLock_by(2);
-        comp_repo.saveAndFlush(comp);
+        comp.setLockUntil(LocalDateTime.now().minusHours(1));
+        comp.setLockBy(2);
+        compRepo.saveAndFlush(comp);
         mvc.perform(post("/api/companies/10/lock").header("Authorization", login("nuwan.s@eng.uni.example")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.held_by").value("Nuwan Silva"));

@@ -22,50 +22,50 @@ public class AdminService
 {
     private final LockService locks;
     private final Rules rules;
-    private final UserRepository user_repo;
+    private final UserRepository userRepo;
     private final AuthService auth;
 
-    public AdminService(LockService locks, Rules rules, UserRepository user_repo, AuthService auth)
+    public AdminService(LockService locks, Rules rules, UserRepository userRepo, AuthService auth)
     {
         this.locks = locks;
         this.rules = rules;
-        this.user_repo = user_repo;
+        this.userRepo = userRepo;
         this.auth = auth;
     }
 
     @Transactional
-    public CompanyView setDays(Integer comp_id, DaysForm form, Me me)
+    public CompanyView setDays(Integer compId, DaysForm form, Me me)
     {
-        Company comp = locks.find(comp_id);
-        comp.setLock_days(form.lock_days());
-        comp.setCool_days(form.cool_days());
-        return locks.show(comp_id, me);
+        Company comp = locks.find(compId);
+        comp.setLockDays(form.lockDays());
+        comp.setCoolDays(form.coolDays());
+        return locks.show(compId, me);
     }
 
     @Transactional
-    public CompanyView lock(Integer comp_id, Integer days, Me me)
+    public CompanyView lock(Integer compId, Integer days, Me me)
     {
-        Company comp = locks.find(comp_id);
+        Company comp = locks.find(compId);
         int span = days != null ? days : rules.coolFor(comp);
         comp.setStatus(Light.Locked);
-        comp.setLock_until(LocalDateTime.now().plusDays(span));
-        comp.setLock_by(me.user_id());
-        return locks.show(comp_id, me);
+        comp.setLockUntil(LocalDateTime.now().plusDays(span));
+        comp.setLockBy(me.userId());
+        return locks.show(compId, me);
     }
 
     @Transactional
-    public CompanyView unlock(Integer comp_id, Me me)
+    public CompanyView unlock(Integer compId, Me me)
     {
-        Company comp = locks.find(comp_id);
+        Company comp = locks.find(compId);
         comp.setStatus(Light.Available);
-        comp.setLock_until(null);
-        comp.setLock_by(null);
-        return locks.show(comp_id, me);
+        comp.setLockUntil(null);
+        comp.setLockBy(null);
+        return locks.show(compId, me);
     }
 
     public List<UserView> users(Role role)
     {
-        return user_repo.findAll().stream()
+        return userRepo.findAll().stream()
             .filter(item -> role == null || item.getRole() == role)
             .sorted(Comparator.comparing(User::getName, String.CASE_INSENSITIVE_ORDER))
             .map(this::view)
@@ -74,12 +74,12 @@ public class AdminService
 
     public UserView addUser(NewUserForm form)
     {
-        SignupForm person = new SignupForm(form.name(), form.reg_no(), form.email(), form.password());
+        SignupForm person = new SignupForm(form.name(), form.regNo(), form.email(), form.password());
         return view(auth.create(person, form.role()));
     }
 
     private UserView view(User user)
     {
-        return new UserView(user.getUser_id(), user.getName(), user.getReg_no(), user.getEmail(), user.getRole());
+        return new UserView(user.getUserId(), user.getName(), user.getRegNo(), user.getEmail(), user.getRole());
     }
 }

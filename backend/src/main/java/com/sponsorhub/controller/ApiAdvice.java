@@ -20,7 +20,8 @@ public class ApiAdvice
         ObjectError first = ex.getBindingResult().getAllErrors().stream().findFirst().orElse(null);
         if (first instanceof FieldError field)
         {
-            text = field.getField() + " " + field.getDefaultMessage();
+            // name the field the way the json does (regNo -> reg_no)
+            text = field.getField().replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase() + " " + field.getDefaultMessage();
         }
         return body(HttpStatus.BAD_REQUEST, text);
     }

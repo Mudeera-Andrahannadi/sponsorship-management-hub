@@ -7,30 +7,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class Rules
 {
-    private final int hold_days;
-    private final int cool_days;
-    private final int max_holds;
+    private final int holdDays;
+    private final int coolDays;
+    private final int maxHolds;
 
-    public Rules(@Value("${hub.hold-days}") int hold_days, @Value("${hub.cool-days}") int cool_days,
-        @Value("${hub.max-holds}") int max_holds)
+    public Rules(@Value("${hub.hold-days}") int holdDays, @Value("${hub.cool-days}") int coolDays,
+        @Value("${hub.max-holds}") int maxHolds)
     {
-        this.hold_days = hold_days;
-        this.cool_days = cool_days;
-        this.max_holds = max_holds;
+        this.holdDays = holdDays;
+        this.coolDays = coolDays;
+        this.maxHolds = maxHolds;
     }
 
     public int maxHolds()
     {
-        return max_holds;
+        return maxHolds;
     }
 
     public int holdFor(Company comp)
     {
-        return comp.getLock_days() != null ? comp.getLock_days() : hold_days;
+        return comp.getLockDays() != null ? comp.getLockDays() : holdDays;
     }
 
     public int coolFor(Company comp)
     {
-        return comp.getCool_days() != null ? comp.getCool_days() : cool_days;
+        return comp.getCoolDays() != null ? comp.getCoolDays() : coolDays;
     }
 }

@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AdminSeed implements ApplicationRunner
 {
-    private final UserRepository user_repo;
+    private final UserRepository userRepo;
     private final AuthService auth;
     private final String email;
     private final String pass;
 
-    public AdminSeed(UserRepository user_repo, AuthService auth, @Value("${hub.admin-email:}") String email, @Value("${hub.admin-pass:}") String pass)
+    public AdminSeed(UserRepository userRepo, AuthService auth, @Value("${hub.admin-email:}") String email, @Value("${hub.admin-pass:}") String pass)
     {
-        this.user_repo = user_repo;
+        this.userRepo = userRepo;
         this.auth = auth;
         this.email = email;
         this.pass = pass;
@@ -27,7 +27,7 @@ public class AdminSeed implements ApplicationRunner
     @Override
     public void run(ApplicationArguments args)
     {
-        if (email.isBlank() || pass.isBlank() || user_repo.count() > 0)
+        if (email.isBlank() || pass.isBlank() || userRepo.count() > 0)
         {
             return;
         }

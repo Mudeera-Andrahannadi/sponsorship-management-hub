@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 public record NewUserForm(
     @NotBlank String name,
-    @NotBlank String reg_no,
+    @NotBlank String regNo,
     @NotBlank @Email String email,
     @NotBlank @Size(min = 8) String password,
     @NotNull Role role)

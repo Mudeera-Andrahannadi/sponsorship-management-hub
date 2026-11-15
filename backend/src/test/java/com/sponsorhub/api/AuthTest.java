@@ -10,9 +10,9 @@ import org.springframework.http.MediaType;
 
 class AuthTest extends ApiBase
 {
-    private String signup(String email, String reg_no, String extra)
+    private String signup(String email, String regNo, String extra)
     {
-        return "{\"name\":\"New Student\",\"reg_no\":\"" + reg_no + "\",\"email\":\"" + email + "\",\"password\":\"longenough1\"" + extra + "}";
+        return "{\"name\":\"New Student\",\"reg_no\":\"" + regNo + "\",\"email\":\"" + email + "\",\"password\":\"longenough1\"" + extra + "}";
     }
 
     @Test

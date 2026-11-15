@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class EventService
 {
-    private final EventRepository event_repo;
+    private final EventRepository eventRepo;
 
-    public EventService(EventRepository event_repo)
+    public EventService(EventRepository eventRepo)
     {
-        this.event_repo = event_repo;
+        this.eventRepo = eventRepo;
     }
 
     public EventView create(EventForm form)
@@ -26,24 +26,24 @@ public class EventService
         Event event = new Event();
         event.setName(form.name());
         event.setSociety(form.society());
-        event.setHeld_on(form.held_on());
-        event.setHeld_month(form.held_on().getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH));
-        return view(event_repo.save(event));
+        event.setHeldOn(form.heldOn());
+        event.setHeldMonth(form.heldOn().getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH));
+        return view(eventRepo.save(event));
     }
 
     public List<EventView> list()
     {
-        Comparator<Event> by_date = Comparator.comparing(Event::getHeld_on, Comparator.nullsLast(Comparator.naturalOrder()));
-        return event_repo.findAll().stream().sorted(by_date).map(this::view).toList();
+        Comparator<Event> byDate = Comparator.comparing(Event::getHeldOn, Comparator.nullsLast(Comparator.naturalOrder()));
+        return eventRepo.findAll().stream().sorted(byDate).map(this::view).toList();
     }
 
     public List<EventView> mine(Me me)
     {
-        return event_repo.activeFor(me.user_id()).stream().map(this::view).toList();
+        return eventRepo.activeFor(me.userId()).stream().map(this::view).toList();
     }
 
     private EventView view(Event event)
     {
-        return new EventView(event.getEvent_id(), event.getName(), event.getSociety(), event.getHeld_month(), event.getHeld_on());
+        return new EventView(event.getEventId(), event.getName(), event.getSociety(), event.getHeldMonth(), event.getHeldOn());
     }
 }

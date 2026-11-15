@@ -16,13 +16,13 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class AuthService
 {
-    private final UserRepository user_repo;
+    private final UserRepository userRepo;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
 
-    public AuthService(UserRepository user_repo, PasswordEncoder encoder, JwtService jwt)
+    public AuthService(UserRepository userRepo, PasswordEncoder encoder, JwtService jwt)
     {
-        this.user_repo = user_repo;
+        this.userRepo = userRepo;
         this.encoder = encoder;
         this.jwt = jwt;
     }
@@ -36,13 +36,13 @@ public class AuthService
     {
         User user = new User();
         user.setName(form.name());
-        user.setReg_no(form.reg_no());
+        user.setRegNo(form.regNo());
         user.setEmail(form.email());
         user.setPassword(encoder.encode(form.password()));
         user.setRole(role);
         try
         {
-            return user_repo.saveAndFlush(user);
+            return userRepo.saveAndFlush(user);
         }
         catch (DataIntegrityViolationException ex)
         {
@@ -52,7 +52,7 @@ public class AuthService
 
     public TokenView login(LoginForm form)
     {
-        User user = user_repo.findByEmail(form.email()).orElse(null);
+        User user = userRepo.findByEmail(form.email()).orElse(null);
         if (user == null || !encoder.matches(form.password(), user.getPassword()))
         {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Wrong email or password");
@@ -62,6 +62,6 @@ public class AuthService
 
     private TokenView token(User user)
     {
-        return new TokenView(jwt.issue(user), user.getUser_id(), user.getName(), user.getRole());
+        return new TokenView(jwt.issue(user), user.getUserId(), user.getName(), user.getRole());
     }
 }

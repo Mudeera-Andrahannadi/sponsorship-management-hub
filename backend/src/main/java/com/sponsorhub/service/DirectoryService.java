@@ -15,12 +15,12 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class DirectoryService
 {
-    private final CompanyRepository comp_repo;
+    private final CompanyRepository compRepo;
     private final LockService locks;
 
-    public DirectoryService(CompanyRepository comp_repo, LockService locks)
+    public DirectoryService(CompanyRepository compRepo, LockService locks)
     {
-        this.comp_repo = comp_repo;
+        this.compRepo = compRepo;
         this.locks = locks;
     }
 
@@ -29,23 +29,23 @@ public class DirectoryService
         Company comp = new Company();
         comp.setStatus(Light.Available);
         fill(comp, form);
-        return locks.show(comp_repo.save(comp).getComp_id(), me);
+        return locks.show(compRepo.save(comp).getCompId(), me);
     }
 
     @Transactional
-    public CompanyView update(Integer comp_id, CompanyForm form, Me me)
+    public CompanyView update(Integer compId, CompanyForm form, Me me)
     {
-        Company comp = locks.find(comp_id);
+        Company comp = locks.find(compId);
         fill(comp, form);
-        return locks.show(comp_id, me);
+        return locks.show(compId, me);
     }
 
-    public void delete(Integer comp_id)
+    public void delete(Integer compId)
     {
-        locks.find(comp_id);
+        locks.find(compId);
         try
         {
-            comp_repo.deleteById(comp_id);
+            compRepo.deleteById(compId);
         }
         catch (DataIntegrityViolationException ex)
         {
