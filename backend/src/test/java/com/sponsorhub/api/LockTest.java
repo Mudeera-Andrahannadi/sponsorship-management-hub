@@ -99,8 +99,20 @@ class LockTest extends ApiBase
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value(containsString("already holding")));
         mvc.perform(post("/api/companies/" + first + "/release").header("Authorization", student)).andExpect(status().isOk());
-        mvc.perform(post("/api/companies/" + newCompany("Cap Test Five") + "/lock").header("Authorization", student))
-            .andExpect(status().isOk());
+        Integer five = newCompany("Cap Test Five");
+        mvc.perform(post("/api/companies/" + five + "/lock").header("Authorization", student)).andExpect(status().isOk());
+
+        // one slot left and two claims at the same moment: only one may take it
+        mvc.perform(post("/api/companies/" + five + "/release").header("Authorization", student)).andExpect(status().isOk());
+        int six = newCompany("Cap Test Six");
+        int seven = newCompany("Cap Test Seven");
+        CyclicBarrier gate = new CyclicBarrier(2);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        Future<Integer> one = pool.submit(() -> claimCode(student, six, gate));
+        Future<Integer> two = pool.submit(() -> claimCode(student, seven, gate));
+        List<Integer> codes = List.of(one.get(), two.get()).stream().sorted().toList();
+        pool.shutdown();
+        assertEquals(List.of(200, 409), codes);
     }
 
     @Test

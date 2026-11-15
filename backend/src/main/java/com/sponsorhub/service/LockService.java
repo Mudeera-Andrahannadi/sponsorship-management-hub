@@ -54,6 +54,8 @@ public class LockService
     @Transactional
     public CompanyView claim(Integer compId, Me me)
     {
+        // keep this the first query: it makes one user's claims wait for each other, so the hold count below is never stale
+        userRepo.lockById(me.userId());
         if (!teamRepo.hasActive(me.userId()))
         {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only active committee members can claim a company");
